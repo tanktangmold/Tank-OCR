@@ -1,0 +1,65 @@
+Tank-OCR
+Copyright (c) 2026 Tank
+Licensed under the MIT License. See LICENSE.
+
+================================================================================
+The OCR runtime is NOT part of this project
+================================================================================
+
+Tank-OCR performs no text recognition of its own. It is a local HTTP server
+that calls the Chrome Screen AI runtime through FFI.
+
+That runtime — the library (chrome_screen_ai.dll / libchromescreenai.so) and
+its model files (*.binarypb, *.tflite) — is produced and distributed by Google
+as a Chrome component. It is:
+
+  * NOT included in this repository
+  * NOT covered by the MIT license above
+  * governed by Google's own terms and by the licenses listed in the
+    THIRD_PARTY_LICENSES file that ships inside the component directory
+
+The component carries a mix of licenses (Apache-2.0, BSD variants, MPL, and
+GPL-with-exception among others). This project therefore does not redistribute
+it. It is read at runtime from wherever Chrome already installed it:
+
+    Windows  %LOCALAPPDATA%\Google\Chrome\User Data\screen_ai\<version>\
+    macOS    ~/Library/Application Support/Google/Chrome/screen_ai/<version>/
+    Linux    ~/.config/google-chrome/screen_ai/<version>/
+
+If you fork or redistribute Tank-OCR, do not bundle that directory. Users
+obtain it through their own Chrome installation. Reference:
+https://chromium.googlesource.com/chromium/src/+/main/services/screen_ai/README.md
+
+================================================================================
+Third-party code
+================================================================================
+
+clv-locro — https://github.com/sergiocorreia/clv-locro
+    MIT License, Copyright (c) 2026 Sergio Correia
+
+    The FFI call sequence used to drive the Screen AI library (symbol names,
+    the file-content callback protocol, and the Skia bitmap layout expected by
+    PerformOCR) follows this project's Python implementation. No source is
+    copied into this repository; the Go code in engine/screenai.go is an
+    independent implementation of the same interface.
+
+github.com/ebitengine/purego — Apache-2.0
+    Calls the runtime library without cgo.
+
+github.com/ledongthuc/pdf — MIT
+    Extracts the native text layer from PDFs, so pages that already contain
+    text are not sent through OCR.
+
+golang.org/x/image — BSD-3-Clause
+    Image decoding and scaling.
+
+Full dependency terms resolve through the Go module graph; see go.mod.
+
+================================================================================
+Optional fallback engine
+================================================================================
+
+fallback/ contains a small Python service that exposes PaddleOCR over the same
+HTTP shape, for machines with no Chromium-based browser. PaddleOCR and its
+models are licensed by their own authors (Apache-2.0) and are likewise not
+included here.

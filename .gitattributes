@@ -1,0 +1,18 @@
+# 统一以 LF 存库，检出时按平台转换
+* text=auto eol=lf
+
+# Windows 批处理与 PowerShell 必须是 CRLF，否则在部分环境下会解析异常
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+*.go   text eol=lf
+*.py   text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+
+*.exe binary
+*.dll binary
+*.so  binary
+*.png binary
+*.pdf binary

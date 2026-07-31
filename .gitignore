@@ -1,0 +1,41 @@
+# OCR runtime — Google's Chrome Screen AI component.
+# Never commit this: it is not ours to redistribute, and it is >100 MB.
+engine-runtime/
+screen_ai/
+kichonai/
+*.dll
+*.so
+*.dylib
+*.binarypb
+*.tflite
+
+# Build output
+tank-ocr.exe
+tank-ocr
+*.exe
+*.bak-*
+
+# Runtime state
+history.json
+temp/
+*.log
+
+# Test inputs and OCR output — may contain real documents
+test-images/
+out/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+
+# Python fallback environment
+.venv/
+__pycache__/
+*.pyc
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp

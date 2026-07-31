@@ -1,0 +1,7 @@
+{
+  "active_engine": "screenai",
+  "local_fallback_url": "http://127.0.0.1:5000/api/ocr",
+  "bind_address": "127.0.0.1:8000",
+  "max_image_dimension": 2048,
+  "history_limit": 50
+}

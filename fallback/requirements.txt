@@ -1,0 +1,11 @@
+# PDF 渲染兜底 —— pdf_render.py / pdf_overlay.py
+# 只有系统里没有 pdftoppm（Poppler）时才会用到
+PyMuPDF>=1.24
+
+# PaddleOCR 兜底引擎 —— paddle_server.py
+# 只有 config.json 里 active_engine 设为 localfallback 时才需要
+fastapi>=0.110
+uvicorn>=0.29
+paddleocr>=2.7
+pillow>=10.0
+numpy>=1.24

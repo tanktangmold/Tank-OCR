@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank-OCR - 独立本地文字提取器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                    <line x1="9" y1="13" x2="15" y2="13"></line>
+                    <line x1="9" y1="17" x2="13" y2="17"></line>
+                </svg>
+                <div class="brand-text">
+                    <h1>Tank-OCR</h1>
+                    <span class="badge">v2</span>
+                </div>
+            </div>
+
+            <!-- Engine Status Card -->
+            <div class="status-card glass" id="engine-status">
+                <div class="status-indicator">
+                    <span class="status-dot pulsing warning"></span>
+                    <span class="status-text">正在检查引擎状态...</span>
+                </div>
+                <div class="status-details hidden">
+                    <p>版本: <span id="engine-version">-</span></p>
+                    <p>最大尺寸: <span id="engine-max-dim">-</span> px</p>
+                </div>
+            </div>
+
+            <!-- History List -->
+            <div class="history-section">
+                <div class="section-header">
+                    <h2>历史记录</h2>
+                    <button class="btn-text" id="clear-history-btn">清空</button>
+                </div>
+                <div class="history-list" id="history-container">
+                    <div class="empty-state-small">暂无历史记录</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>本地离线运行 • 100% 隐私安全</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Header bar with settings -->
+            <header class="workspace-header">
+                <div class="config-bar glass">
+                    <!-- Page range for PDFs -->
+                    <div class="config-group">
+                        <label for="pdf-pages">页码范围 (PDF):</label>
+                        <input type="text" id="pdf-pages" placeholder="例如: 1-3, 5" title="留空表示识别全部页面">
+                    </div>
+                    
+                    <!-- Searchable PDF checkbox -->
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="make-searchable">
+                        <label for="make-searchable" class="checkbox-label" title="生成双层可搜索可复制的PDF文件并下载">
+                            生成双层可搜索 PDF
+                        </label>
+                    </div>
+
+                    <!-- Light mode checkbox -->
+                    <div class="config-group checkbox-group">
+                        <input type="checkbox" id="light-mode">
+                        <label for="light-mode" class="checkbox-label" title="使用轻量级模型进行OCR，识别速度更快，精度略有降低">
+                            极速模式 (低占用)
+                        </label>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Workspace Content area -->
+            <div class="workspace-content">
+                <!-- Dropzone for Uploads -->
+                <div class="drop-zone glass active" id="drop-zone">
+                    <div class="drop-zone-content">
+                        <div class="icon-wrapper pulsing">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h3>拖放文件到这里，或点击上传</h3>
+                        <p>支持图片 (PNG, JPG, WebP, BMP, GIF) 和 PDF 文件</p>
+                        <input type="file" id="file-input" class="hidden" accept="image/*,application/pdf">
+                    </div>
+                </div>
+
+                <!-- Processing Overlay / Loader -->
+                <div class="loading-zone glass hidden" id="loading-zone">
+                    <div class="loader-content">
+                        <div class="spinner"></div>
+                        <h3>正在识别中，请稍候...</h3>
+                        <p id="loading-status">启动本地 OCR 神经网络进行图像解析...</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Split Result Viewer (Image Overlay & Text Box) -->
+                <div class="result-viewer hidden" id="result-viewer">
+                    <!-- Left: Original Image & Box Overlay -->
+                    <div class="panel image-panel glass">
+                        <div class="panel-header">
+                            <span class="panel-title" id="file-title">图像预览与文字层</span>
+                            <div class="panel-actions">
+                                <button class="btn-icon" id="zoom-in" title="放大">+</button>
+                                <button class="btn-icon" id="zoom-out" title="缩小">-</button>
+                                <button class="btn-icon" id="reset-zoom" title="自适应">适应</button>
+                            </div>
+                        </div>
+                        <div class="viewer-container" id="zoom-container">
+                            <div class="overlay-wrapper" id="overlay-wrapper">
+                                <img id="source-image" src="" alt="OCR Source">
+                                <div class="box-overlay" id="box-overlay"></div>
+                            </div>
+                            <div class="pdf-file-info hidden" id="pdf-file-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <h3>PDF 文件已成功识别</h3>
+                                <p id="pdf-pages-count">已成功提取全部页面的文本数据</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Extracted Plain Text Editor -->
+                    <div class="panel text-panel glass">
+                        <div class="panel-header">
+                            <span class="panel-title">识别结果 (纯文本)</span>
+                            <span class="time-badge" id="elapsed-time">0.0s</span>
+                        </div>
+                        <div class="text-editor-container">
+                            <textarea id="output-text" placeholder="OCR文字提取结果将在这里显示..."></textarea>
+                        </div>
+                        <div class="panel-footer">
+                            <button class="btn btn-secondary" id="download-json-btn">下载 JSON</button>
+                            <button class="btn btn-primary" id="copy-btn">
+                                <span class="btn-text">复制文字</span>
+                            </button>
+                            <button class="btn btn-secondary" id="close-btn">重新上传</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tooltip Element -->
+    <div id="ocr-tooltip" class="ocr-tooltip hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
