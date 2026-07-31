@@ -62,7 +62,11 @@ dir "%LOCALAPPDATA%\Google\Chrome\User Data\screen_ai"
 需要 [Go 1.22+](https://go.dev/dl/)。
 
 ```bash
-go build -ldflags "-s -w" -o tank-ocr.exe .
+git clone https://github.com/tanktangmold/Tank-OCR.git
+```
+
+```bash
+cd Tank-OCR && go build -ldflags "-s -w" -o tank-ocr.exe .
 ```
 
 Windows 上也可以直接双击 `build.bat`。
