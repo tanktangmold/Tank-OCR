@@ -1,11 +1,17 @@
 // Client-side script for Tank-OCR
 
+function t(key, vars) {
+    return window.TankOcrI18n ? window.TankOcrI18n.t(key, vars) : key;
+}
+
 // Global states
 let currentFile = null;
 let currentOcrResult = null; // Store current OCR JSON response
 let currentImageSrc = null; // Store base64 DataURL of current image
 let currentScale = 1.0;
 let resizeListener = null;
+let lastEngineStatus = null; // { kind: 'ready'|'failed'|'offline', engine? }
+let lastResultMeta = null; // { isPdf, filename, pagesCount }
 
 // Selectors
 const dropZone = document.getElementById('drop-zone');
@@ -43,10 +49,45 @@ const ocrTooltip = document.getElementById('ocr-tooltip');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.TankOcrI18n) {
+        window.TankOcrI18n.apply();
+    }
     checkEngineStatus();
     loadHistory();
     setupEventListeners();
 });
+
+document.addEventListener('tank-ocr:langchange', () => {
+    refreshDynamicLabels();
+    loadHistory();
+});
+
+function refreshDynamicLabels() {
+    applyEngineStatusText();
+    if (lastResultMeta && !resultViewer.classList.contains('hidden')) {
+        fileTitle.textContent = t('previewWithFile', { filename: lastResultMeta.filename });
+        if (lastResultMeta.isPdf) {
+            pdfPagesCount.textContent = t('pdfPagesDone', { count: lastResultMeta.pagesCount });
+        }
+    }
+    const copyLabel = copyBtn.querySelector('.btn-text');
+    if (copyLabel && copyLabel.dataset.i18n === 'copyText') {
+        copyLabel.textContent = t('copyText');
+    }
+}
+
+function applyEngineStatusText() {
+    if (!lastEngineStatus) return;
+    const text = engineStatus.querySelector('.status-text');
+    if (!text) return;
+    if (lastEngineStatus.kind === 'ready') {
+        text.textContent = t('engineReady', { engine: lastEngineStatus.engine });
+    } else if (lastEngineStatus.kind === 'failed') {
+        text.textContent = t('engineFailed');
+    } else {
+        text.textContent = t('engineOffline');
+    }
+}
 
 // Check Engine Status
 async function checkEngineStatus() {
@@ -55,33 +96,43 @@ async function checkEngineStatus() {
         const data = await res.json();
         
         const dot = engineStatus.querySelector('.status-dot');
-        const text = engineStatus.querySelector('.status-text');
         const details = engineStatus.querySelector('.status-details');
         
         dot.className = 'status-dot';
         
         if (data.status === 'ready') {
             dot.classList.add('success');
-            text.textContent = `引擎已就绪 (${data.engine})`;
+            lastEngineStatus = { kind: 'ready', engine: data.engine };
+            applyEngineStatusText();
             document.getElementById('engine-version').textContent = data.version;
             document.getElementById('engine-max-dim').textContent = data.max_dimension;
             details.classList.remove('hidden');
         } else {
             dot.classList.add('error');
-            text.textContent = '引擎初始化失败';
+            lastEngineStatus = { kind: 'failed' };
+            applyEngineStatusText();
             console.error('OCR Engine error:', data.detail);
         }
     } catch (e) {
         console.error('Failed to get status:', e);
         const dot = engineStatus.querySelector('.status-dot');
-        const text = engineStatus.querySelector('.status-text');
         dot.className = 'status-dot error';
-        text.textContent = '无法连接到后端服务器';
+        lastEngineStatus = { kind: 'offline' };
+        applyEngineStatusText();
     }
 }
 
 // Setup Event Listeners
 function setupEventListeners() {
+    document.querySelectorAll('.lang-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const lang = btn.getAttribute('data-lang');
+            if (window.TankOcrI18n) {
+                window.TankOcrI18n.setLang(lang);
+            }
+        });
+    });
+
     // Click dropzone triggers file picker
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
@@ -145,12 +196,15 @@ function handleFileSelection(file) {
     const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp|gif|tiff?)$/i.test(file.name);
     
     if (!isPdf && !isImage) {
-        alert('不支持的文件格式！请上传常见图片或 PDF 文件。');
+        alert(t('unsupportedFormat'));
         return;
     }
     const maxBytes = isPdf ? 50 * 1024 * 1024 : 32 * 1024 * 1024;
     if (file.size > maxBytes) {
-        alert(`文件过大，${isPdf ? 'PDF' : '图片'}最大允许 ${isPdf ? 50 : 32} MB。`);
+        alert(t('fileTooLarge', {
+            kind: isPdf ? t('kindPdf') : t('kindImage'),
+            max: isPdf ? 50 : 32,
+        }));
         return;
     }
 
@@ -182,9 +236,9 @@ async function startOcrProcess(file, isPdf) {
     const makeSearchable = makeSearchableCheckbox.checked;
     const lightMode = lightModeCheckbox.checked;
     
-    loadingStatus.textContent = isPdf 
-        ? `正在通过本地 OCR 模块解析 PDF 页面... (${makeSearchable ? '正在生成可搜索 PDF' : '正在提取文字'})`
-        : '正在启动本地 OCR 神经网络进行图像解析...';
+    loadingStatus.textContent = isPdf
+        ? (makeSearchable ? t('loadingPdfSearchable') : t('loadingPdfText'))
+        : t('loadingImage');
 
     // Prepare multipart data
     const formData = new FormData();
@@ -206,7 +260,7 @@ async function startOcrProcess(file, isPdf) {
 
         if (!response.ok) {
             const contentType = response.headers.get('content-type') || '';
-            let message = `识别失败 (HTTP ${response.status})`;
+            let message = t('ocrFailedHttp', { status: response.status });
             if (contentType.includes('application/json')) {
                 const errData = await response.json();
                 message = errData.detail || message;
@@ -241,7 +295,7 @@ async function startOcrProcess(file, isPdf) {
             // Re-render dropzone
             resetWorkspace();
             loadHistory();
-            alert('可搜索 PDF 生成成功，已自动启动下载！');
+            alert(t('searchablePdfDone'));
             return;
         }
 
@@ -274,7 +328,7 @@ async function startOcrProcess(file, isPdf) {
         }
         
     } catch (error) {
-        alert(`OCR 识别出错: ${error.message}`);
+        alert(t('ocrError', { message: error.message }));
         resetWorkspace();
     }
 }
@@ -284,8 +338,11 @@ function renderOcrResults(data, isPdf) {
     loadingZone.classList.add('hidden');
     resultViewer.classList.remove('hidden');
     
+    const pagesCount = data.result && data.result.pages ? data.result.pages.length : 0;
+    lastResultMeta = { isPdf, filename: data.filename, pagesCount };
+
     // Set headers
-    fileTitle.textContent = `${data.filename} - 图像预览与文字层`;
+    fileTitle.textContent = t('previewWithFile', { filename: data.filename });
     elapsedTime.textContent = `${data.duration_seconds.toFixed(2)}s`;
     
     // Set output text
@@ -299,9 +356,7 @@ function renderOcrResults(data, isPdf) {
         pdfFileInfo.classList.remove('hidden');
         overlayWrapper.classList.add('hidden');
         
-        // Calculate page count
-        const pagesCount = data.result.pages ? data.result.pages.length : 0;
-        pdfPagesCount.textContent = `已成功识别全部 ${pagesCount} 页的文本数据，右侧可直接编辑、复制。`;
+        pdfPagesCount.textContent = t('pdfPagesDone', { count: pagesCount });
     } else {
         sourceImage.classList.remove('hidden');
         pdfFileInfo.classList.add('hidden');
@@ -380,7 +435,9 @@ function drawBoxes(result) {
         
         // Setup tooltip hover events
         boxDiv.addEventListener('mouseenter', () => {
-            const conf = word.confidence !== null ? `置信度: ${Math.round(word.confidence * 100)}%` : '';
+            const conf = word.confidence !== null && word.confidence !== undefined
+                ? t('confidence', { pct: Math.round(word.confidence * 100) })
+                : '';
             ocrTooltip.innerHTML = `<strong>${escapeHtml(word.text)}</strong>${conf ? `<span class="confidence-score">${conf}</span>` : ''}`;
             ocrTooltip.classList.remove('hidden');
         });
@@ -416,12 +473,12 @@ function copyTextToClipboard() {
     if (!text.trim()) return;
     
     navigator.clipboard.writeText(text).then(() => {
-        const originalText = copyBtn.querySelector('.btn-text').textContent;
-        copyBtn.querySelector('.btn-text').textContent = '已复制！';
+        const label = copyBtn.querySelector('.btn-text');
+        label.textContent = t('copied');
         copyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)'; // Success green
         
         setTimeout(() => {
-            copyBtn.querySelector('.btn-text').textContent = originalText;
+            label.textContent = t('copyText');
             copyBtn.style.background = ''; // Revert to stylesheet default
         }, 1500);
     }).catch(err => {
@@ -445,6 +502,7 @@ function resetWorkspace() {
     currentFile = null;
     currentOcrResult = null;
     currentImageSrc = null;
+    lastResultMeta = null;
     boxOverlay.innerHTML = '';
     outputText.value = '';
     
@@ -467,7 +525,7 @@ async function loadHistory() {
         historyContainer.innerHTML = '';
         
         if (history.length === 0) {
-            historyContainer.innerHTML = '<div class="empty-state-small">暂无历史记录</div>';
+            historyContainer.innerHTML = `<div class="empty-state-small">${escapeHtml(t('emptyHistory'))}</div>`;
             return;
         }
 
@@ -478,11 +536,12 @@ async function loadHistory() {
             
             const isPdf = item.type.startsWith('pdf');
             const sizeMb = (item.size / (1024 * 1024)).toFixed(2);
+            const typeLabel = isPdf ? t('historyTypePdf') : t('historyTypeImage');
             
             itemDiv.innerHTML = `
                 <div class="history-item-top">
                     <span class="history-item-name" title="${escapeHtml(item.filename)}">${escapeHtml(item.filename)}</span>
-                    <span class="history-item-type ${isPdf ? 'pdf' : ''}">${isPdf ? 'PDF' : '图片'}</span>
+                    <span class="history-item-type ${isPdf ? 'pdf' : ''}">${escapeHtml(typeLabel)}</span>
                 </div>
                 <div class="history-item-meta">
                     <span>${item.timestamp}</span>
@@ -504,7 +563,7 @@ function loadHistoryDetail(id, isPdf) {
     const cachedImage = localStorage.getItem(`ocr_image_${id}`);
     
     if (!cachedOcr) {
-        alert('无法加载该记录的详细结果，可能由于本地缓存已清除。');
+        alert(t('historyCacheMissing'));
         return;
     }
 
@@ -524,7 +583,7 @@ function loadHistoryDetail(id, isPdf) {
 }
 
 async function clearAllHistory() {
-    if (!confirm('确定要清除所有 OCR 历史记录吗？这还将清空本地结果缓存。')) {
+    if (!confirm(t('clearHistoryConfirm'))) {
         return;
     }
     try {
@@ -552,5 +611,5 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
 }
