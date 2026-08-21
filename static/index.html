@@ -21,33 +21,37 @@
                     <h1>Tank-OCR</h1>
                     <span class="badge">v2</span>
                 </div>
+                <div class="lang-switch" role="group" aria-label="Language">
+                    <button type="button" class="lang-btn" data-lang="zh" data-i18n="langZh">中文</button>
+                    <button type="button" class="lang-btn" data-lang="en" data-i18n="langEn">EN</button>
+                </div>
             </div>
 
             <!-- Engine Status Card -->
             <div class="status-card glass" id="engine-status">
                 <div class="status-indicator">
                     <span class="status-dot pulsing warning"></span>
-                    <span class="status-text">正在检查引擎状态...</span>
+                    <span class="status-text" data-i18n="checkingEngine">正在检查引擎状态...</span>
                 </div>
                 <div class="status-details hidden">
-                    <p>版本: <span id="engine-version">-</span></p>
-                    <p>最大尺寸: <span id="engine-max-dim">-</span> px</p>
+                    <p><span data-i18n="versionLabel">版本:</span> <span id="engine-version">-</span></p>
+                    <p><span data-i18n="maxDimLabel">最大尺寸:</span> <span id="engine-max-dim">-</span> px</p>
                 </div>
             </div>
 
             <!-- History List -->
             <div class="history-section">
                 <div class="section-header">
-                    <h2>历史记录</h2>
-                    <button class="btn-text" id="clear-history-btn">清空</button>
+                    <h2 data-i18n="history">历史记录</h2>
+                    <button class="btn-text" id="clear-history-btn" data-i18n="clear">清空</button>
                 </div>
                 <div class="history-list" id="history-container">
-                    <div class="empty-state-small">暂无历史记录</div>
+                    <div class="empty-state-small" data-i18n="emptyHistory">暂无历史记录</div>
                 </div>
             </div>
             
             <div class="sidebar-footer">
-                <p>本地离线运行 • 100% 隐私安全</p>
+                <p data-i18n="footerPrivacy">本地离线运行 • 100% 隐私安全</p>
             </div>
         </aside>
 
@@ -58,14 +62,14 @@
                 <div class="config-bar glass">
                     <!-- Page range for PDFs -->
                     <div class="config-group">
-                        <label for="pdf-pages">页码范围 (PDF):</label>
-                        <input type="text" id="pdf-pages" placeholder="例如: 1-3, 5" title="留空表示识别全部页面">
+                        <label for="pdf-pages" data-i18n="pdfPagesLabel">页码范围 (PDF):</label>
+                        <input type="text" id="pdf-pages" data-i18n-placeholder="pdfPagesPlaceholder" data-i18n-title="pdfPagesTitle" placeholder="例如: 1-3, 5" title="留空表示识别全部页面">
                     </div>
                     
                     <!-- Searchable PDF checkbox -->
                     <div class="config-group checkbox-group">
                         <input type="checkbox" id="make-searchable">
-                        <label for="make-searchable" class="checkbox-label" title="生成双层可搜索可复制的PDF文件并下载">
+                        <label for="make-searchable" class="checkbox-label" data-i18n="makeSearchable" data-i18n-title="makeSearchableTitle" title="生成双层可搜索可复制的PDF文件并下载">
                             生成双层可搜索 PDF
                         </label>
                     </div>
@@ -73,7 +77,7 @@
                     <!-- Light mode checkbox -->
                     <div class="config-group checkbox-group">
                         <input type="checkbox" id="light-mode">
-                        <label for="light-mode" class="checkbox-label" title="使用轻量级模型进行OCR，识别速度更快，精度略有降低">
+                        <label for="light-mode" class="checkbox-label" data-i18n="lightMode" data-i18n-title="lightModeTitle" title="使用轻量级模型进行OCR，识别速度更快，精度略有降低">
                             极速模式 (低占用)
                         </label>
                     </div>
@@ -92,8 +96,8 @@
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
                         </div>
-                        <h3>拖放文件到这里，或点击上传</h3>
-                        <p>支持图片 (PNG, JPG, WebP, BMP, GIF) 和 PDF 文件</p>
+                        <h3 data-i18n="dropTitle">拖放文件到这里，或点击上传</h3>
+                        <p data-i18n="dropHint">支持图片 (PNG, JPG, WebP, BMP, GIF) 和 PDF 文件</p>
                         <input type="file" id="file-input" class="hidden" accept="image/*,application/pdf">
                     </div>
                 </div>
@@ -102,8 +106,8 @@
                 <div class="loading-zone glass hidden" id="loading-zone">
                     <div class="loader-content">
                         <div class="spinner"></div>
-                        <h3>正在识别中，请稍候...</h3>
-                        <p id="loading-status">启动本地 OCR 神经网络进行图像解析...</p>
+                        <h3 data-i18n="loadingTitle">正在识别中，请稍候...</h3>
+                        <p id="loading-status" data-i18n="loadingDefault">启动本地 OCR 神经网络进行图像解析...</p>
                         <div class="progress-bar">
                             <div class="progress-fill" id="progress-fill"></div>
                         </div>
@@ -115,11 +119,11 @@
                     <!-- Left: Original Image & Box Overlay -->
                     <div class="panel image-panel glass">
                         <div class="panel-header">
-                            <span class="panel-title" id="file-title">图像预览与文字层</span>
+                            <span class="panel-title" id="file-title" data-i18n="previewTitle">图像预览与文字层</span>
                             <div class="panel-actions">
-                                <button class="btn-icon" id="zoom-in" title="放大">+</button>
-                                <button class="btn-icon" id="zoom-out" title="缩小">-</button>
-                                <button class="btn-icon" id="reset-zoom" title="自适应">适应</button>
+                                <button class="btn-icon" id="zoom-in" data-i18n-title="zoomIn" title="放大">+</button>
+                                <button class="btn-icon" id="zoom-out" data-i18n-title="zoomOut" title="缩小">-</button>
+                                <button class="btn-icon" id="reset-zoom" data-i18n="fit" data-i18n-title="fit" title="自适应">适应</button>
                             </div>
                         </div>
                         <div class="viewer-container" id="zoom-container">
@@ -135,8 +139,8 @@
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
                                     <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
-                                <h3>PDF 文件已成功识别</h3>
-                                <p id="pdf-pages-count">已成功提取全部页面的文本数据</p>
+                                <h3 data-i18n="pdfRecognized">PDF 文件已成功识别</h3>
+                                <p id="pdf-pages-count" data-i18n="pdfPagesDefault">已成功提取全部页面的文本数据</p>
                             </div>
                         </div>
                     </div>
@@ -144,18 +148,18 @@
                     <!-- Right: Extracted Plain Text Editor -->
                     <div class="panel text-panel glass">
                         <div class="panel-header">
-                            <span class="panel-title">识别结果 (纯文本)</span>
+                            <span class="panel-title" data-i18n="resultTitle">识别结果 (纯文本)</span>
                             <span class="time-badge" id="elapsed-time">0.0s</span>
                         </div>
                         <div class="text-editor-container">
-                            <textarea id="output-text" placeholder="OCR文字提取结果将在这里显示..."></textarea>
+                            <textarea id="output-text" data-i18n-placeholder="resultPlaceholder" placeholder="OCR文字提取结果将在这里显示..."></textarea>
                         </div>
                         <div class="panel-footer">
-                            <button class="btn btn-secondary" id="download-json-btn">下载 JSON</button>
+                            <button class="btn btn-secondary" id="download-json-btn" data-i18n="downloadJson">下载 JSON</button>
                             <button class="btn btn-primary" id="copy-btn">
-                                <span class="btn-text">复制文字</span>
+                                <span class="btn-text" data-i18n="copyText">复制文字</span>
                             </button>
-                            <button class="btn btn-secondary" id="close-btn">重新上传</button>
+                            <button class="btn btn-secondary" id="close-btn" data-i18n="reupload">重新上传</button>
                         </div>
                     </div>
                 </div>
@@ -166,6 +170,7 @@
     <!-- Tooltip Element -->
     <div id="ocr-tooltip" class="ocr-tooltip hidden"></div>
 
+    <script src="i18n.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
