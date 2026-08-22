@@ -686,6 +686,25 @@ html {
     font-size: 18px;
 }
 
+.kid-card small {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    padding: 3px 8px;
+    background: var(--sun);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.kid-card.last-child {
+    background:
+        radial-gradient(circle at 78% 18%, rgba(242, 193, 78, .46), transparent 34%),
+        #fff7d6;
+}
+
 .add-kid {
     display: grid;
     gap: 12px;

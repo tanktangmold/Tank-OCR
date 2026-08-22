@@ -286,11 +286,14 @@ async function loadKids() {
 function renderKids() {
     const grid = $("kid-grid");
     grid.innerHTML = "";
+    const last = localStorage.getItem("learn-child");
     state.children.forEach((child) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "kid-card";
-        btn.innerHTML = `<span class="kid-face">${child.avatar}</span><strong>${escapeHtml(child.name)}</strong>`;
+        btn.className = "kid-card" + (child.id === last ? " last-child" : "");
+        btn.innerHTML = `<span class="kid-face">${child.avatar}</span><strong>${escapeHtml(child.name)}</strong>${
+            child.id === last ? `<small>前回</small>` : ""
+        }`;
         btn.addEventListener("click", () => selectChild(child));
         grid.appendChild(btn);
     });
@@ -773,12 +776,6 @@ if (window.speechSynthesis) {
     speechSynthesis.addEventListener("voiceschanged", () => pickChineseVoice());
 }
 
-loadKids()
-    .then(async () => {
-        const last = localStorage.getItem("learn-child");
-        const found = state.children.find((c) => c.id === last);
-        if (found) selectChild(found);
-    })
-    .catch(() => {
-        $("lan-hint").textContent = "サーバーに接続できなかったよ。xiaoxue-zhongwen で go run . してね。";
-    });
+loadKids().catch(() => {
+    $("lan-hint").textContent = "サーバーに接続できなかったよ。xiaoxue-zhongwen で go run . してね。";
+});
