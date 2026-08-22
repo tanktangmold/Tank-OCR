@@ -40,6 +40,23 @@ func TestEnsureSentenceImageIsLocalSVG(t *testing.T) {
 	}
 }
 
+func TestPrewarmCourseImagesBuildsLocalCache(t *testing.T) {
+	prevMedia, prevStatic := mediaDir, staticDir
+	t.Cleanup(func() { SetMediaPaths(prevMedia, prevStatic) })
+	dir := t.TempDir()
+	SetMediaPaths(dir, "static")
+	if err := PrewarmCourseImages([]string{"comic"}); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := os.ReadDir(filepath.Join(dir, "images"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) < 30 {
+		t.Fatalf("expected prebuilt lesson images, got %d", len(entries))
+	}
+}
+
 func TestVoicesIncludeFemaleAndMale(t *testing.T) {
 	var female, male int
 	for _, voice := range Voices {

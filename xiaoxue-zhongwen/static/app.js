@@ -8,6 +8,7 @@ const SCENE_ALIAS = {
 };
 
 const AVATARS = ["⚽", "🌟", "🐼", "🐶", "🌸", "🔥", "🌈", "🎯"];
+const IMAGE_VERSION = "local-svg-v3";
 
 const state = {
     child: null,
@@ -26,6 +27,7 @@ const state = {
     voices: [],
     audio: null,
     imageLoadTimer: null,
+    imageSeq: 0,
     speakSeq: 0,
     slowRun: 0,
     speakFinish: null,
@@ -62,7 +64,7 @@ function sceneUrl(style, scene) {
 }
 
 function lineImageUrl(day, line, style) {
-    return `/api/image?day=${day}&line=${line}&style=${encodeURIComponent(style)}`;
+    return `/api/image?day=${day}&line=${line}&style=${encodeURIComponent(style)}&v=${IMAGE_VERSION}`;
 }
 
 function pickChineseVoice() {
@@ -404,10 +406,11 @@ function renderStyles() {
     bar.innerHTML = "";
     ["comic", "picturebook", "realistic"].forEach((id, i) => {
         const ja = ["まんが", "えほん", "リアル"][i];
+        const icon = ["🎨", "📖", "🌿"][i];
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "style-btn" + (id === state.style ? " active" : "");
-        btn.innerHTML = `<img alt="" src="images/${id}/preview.webp"><span>${ja}</span>`;
+        btn.innerHTML = `<span class="style-icon" aria-hidden="true">${icon}</span><span>${ja}</span>`;
         btn.addEventListener("click", () => {
             state.style = id;
             localStorage.setItem("learn-style", id);
@@ -441,6 +444,7 @@ function renderVoices() {
 function renderLesson() {
     const beat = currentBeat();
     const lesson = state.lesson;
+    const imageSeq = ++state.imageSeq;
     $("day-moral").textContent = `${lesson.title.ja}　${lesson.moral.ja}`;
     const img = $("scene-image");
     const frame = $("picture-frame");
@@ -451,17 +455,19 @@ function renderLesson() {
     if (frame) frame.classList.remove("loading");
     if (loading) loading.hidden = true;
     state.imageLoadTimer = setTimeout(() => {
-        if (imageDone) return;
+        if (imageDone || imageSeq !== state.imageSeq) return;
         if (frame) frame.classList.add("loading");
         if (loading) loading.hidden = false;
     }, 250);
     img.onload = () => {
+        if (imageSeq !== state.imageSeq) return;
         imageDone = true;
         if (state.imageLoadTimer) clearTimeout(state.imageLoadTimer);
         if (frame) frame.classList.remove("loading");
         if (loading) loading.hidden = true;
     };
     img.onerror = () => {
+        if (imageSeq !== state.imageSeq) return;
         imageDone = true;
         if (state.imageLoadTimer) clearTimeout(state.imageLoadTimer);
         img.onerror = null;

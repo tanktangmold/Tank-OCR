@@ -24,6 +24,11 @@ func main() {
 	}
 	wd, _ := os.Getwd()
 	learn.SetMediaPaths(filepath.Join(wd, "data", "media"), getStaticDir())
+	if err := learn.PrewarmCourseImages(nil); err != nil {
+		log.Printf("Course image prewarm failed: %v", err)
+	} else {
+		log.Printf("Course images are prebuilt in local cache")
+	}
 
 	staticDir := getStaticDir()
 	mux := http.NewServeMux()

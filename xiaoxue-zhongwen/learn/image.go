@@ -166,6 +166,24 @@ func EnsureSentenceImage(zh, scene, style string) (string, error) {
 	return path, nil
 }
 
+// PrewarmCourseImages builds every lesson image before children start tapping.
+func PrewarmCourseImages(styles []string) error {
+	if len(styles) == 0 {
+		styles = []string{"comic", "picturebook", "realistic"}
+	}
+	course := LoadCourse()
+	for _, day := range course.Days {
+		for i, beat := range day.Lines {
+			for _, style := range styles {
+				if _, err := EnsureSentenceImage(beat.Sentence.ZH, beat.Scene, style); err != nil {
+					return fmt.Errorf("day %d line %d style %s: %w", day.Day, i+1, style, err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func imageLock(path string) *sync.Mutex {
 	v, _ := imageLocks.LoadOrStore(path, &sync.Mutex{})
 	return v.(*sync.Mutex)
