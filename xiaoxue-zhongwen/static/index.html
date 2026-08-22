@@ -25,17 +25,47 @@
             </div>
         </header>
 
-        <section class="screen active" id="screen-kids" data-screen="kids">
-            <h1>だれが学ぶ？</h1>
-            <p class="lead">iPadでおしてね。何人でも同時に使えるよ。ひとりずつ、自分の顔を選ぶ。</p>
-            <div class="kid-grid" id="kid-grid"></div>
-            <form class="add-kid" id="add-kid">
-                <p class="agent-name">あたらしいこども</p>
-                <div class="avatar-row" id="avatar-row"></div>
-                <input id="kid-name" type="text" maxlength="12" placeholder="なまえ" autocomplete="off" enterkeyhint="done">
-                <button type="submit" class="primary-btn">つくる</button>
-            </form>
-            <p class="muted" id="lan-hint"></p>
+        <section class="screen active kids-home" id="screen-kids" data-screen="kids">
+            <div class="home-hero">
+                <div class="home-copy">
+                    <p class="eyebrow">小小中文 · C罗成长故事</p>
+                    <h1>今天谁来听故事？</h1>
+                    <p class="lead">选自己的头像，听一句中文，踢进一个小目标。每天15分钟，慢慢喜欢上中文。</p>
+                    <div class="home-badges" aria-label="コースの特徴">
+                        <span>⚽ 30日</span>
+                        <span>🔊 点读</span>
+                        <span>🎮 每天游戏</span>
+                    </div>
+                </div>
+                <div class="home-art" aria-hidden="true">
+                    <div class="sun-ball">⚽</div>
+                    <div class="story-card-mini">
+                        <span>一</span>
+                        <strong>他爱足球。</strong>
+                    </div>
+                    <div class="kid-runner">🏃</div>
+                    <div class="goal-net"></div>
+                </div>
+            </div>
+            <div class="home-panels">
+                <section class="home-panel choose-panel">
+                    <div class="panel-head">
+                        <p class="agent-name">つづきから</p>
+                        <span>自分の顔を押してね</span>
+                    </div>
+                    <div class="kid-grid" id="kid-grid"></div>
+                </section>
+                <form class="add-kid home-panel" id="add-kid">
+                    <div class="panel-head">
+                        <p class="agent-name">あたらしいこども</p>
+                        <span>はじめてなら作る</span>
+                    </div>
+                    <div class="avatar-row" id="avatar-row"></div>
+                    <input id="kid-name" type="text" maxlength="12" placeholder="なまえ" autocomplete="off" enterkeyhint="done">
+                    <button type="submit" class="primary-btn">つくる</button>
+                </form>
+            </div>
+            <p class="muted lan-card" id="lan-hint"></p>
         </section>
 
         <section class="screen" id="screen-calendar" data-screen="calendar">
