@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -260,18 +261,48 @@ func uniqueInts(values []int) []int {
 // LANURLs lists addresses other iPads can open on the same Wi-Fi.
 func LANURLs(port string) []string {
 	var urls []string
-	addrs, err := net.InterfaceAddrs()
+	ifaces, err := net.Interfaces()
 	if err != nil {
 		return urls
 	}
-	for _, addr := range addrs {
-		ipNet, ok := addr.(*net.IPNet)
-		if !ok || ipNet.IP.IsLoopback() || ipNet.IP.To4() == nil {
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 || isVirtualInterface(iface.Name) {
 			continue
 		}
-		urls = append(urls, "http://"+ipNet.IP.String()+":"+port)
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, addr := range addrs {
+			ipNet, ok := addr.(*net.IPNet)
+			if !ok || !isLikelyPhoneReachableIPv4(ipNet.IP) {
+				continue
+			}
+			urls = append(urls, "http://"+ipNet.IP.String()+":"+port)
+		}
 	}
 	return urls
+}
+
+func isVirtualInterface(name string) bool {
+	name = strings.ToLower(name)
+	prefixes := []string{"docker", "br-", "veth", "vmnet", "utun", "tailscale", "zt", "lo"}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(name, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func isLikelyPhoneReachableIPv4(ip net.IP) bool {
+	v4 := ip.To4()
+	if v4 == nil || ip.IsLoopback() || ip.IsLinkLocalUnicast() {
+		return false
+	}
+	// Most home Wi-Fi networks are 192.168.x.x or 10.x.x.x. 172.16-31 is
+	// commonly a Docker/container bridge here and often cannot be opened by phones.
+	return v4[0] == 192 && v4[1] == 168 || v4[0] == 10
 }
 
 // ChildExists reports whether a profile id is known.

@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"xiaoxue-zhongwen/learn"
 )
@@ -149,12 +150,18 @@ func HandleServerInfo(w http.ResponseWriter, r *http.Request) {
 	if host == "" {
 		host = "127.0.0.1:" + port
 	}
+	publicURL := strings.TrimSpace(os.Getenv("PUBLIC_URL"))
+	lanURLs := learn.LANURLs(port)
+	if publicURL != "" {
+		lanURLs = append([]string{publicURL}, lanURLs...)
+	}
 	writeJSON(w, map[string]any{
-		"name":    "小小中文",
-		"port":    port,
-		"thisUrl": "http://" + host,
-		"lanUrls": learn.LANURLs(port),
-		"hintJa":  "同じWi-FiのiPadで、このアドレスを開いてね。子どもは自分の顔を押せばいいよ。",
-		"hintZh":  "同一Wi-Fi下的iPad打开这个地址。每个孩子点自己的头像，进度互不影响。",
+		"name":      "小小中文",
+		"port":      port,
+		"thisUrl":   "http://" + host,
+		"lanUrls":   lanURLs,
+		"publicUrl": publicURL,
+		"hintJa":    "同じWi-FiのiPadで、このアドレスを開いてね。表示されない時は、パソコンのWi-Fi IPを使ってね。",
+		"hintZh":    "同一Wi-Fi下的手机/iPad打开这个地址。没有显示时，请用电脑的Wi-Fi IP，或设置 PUBLIC_URL。",
 	})
 }

@@ -303,9 +303,14 @@ function renderKids() {
     if (!state.children.length) {
         grid.innerHTML = `<p class="muted">まだだれもいないよ。したからなまえを入れてね。</p>`;
     }
-    $("lan-hint").textContent = state.info
-        ? `${state.info.hintJa} ${(state.info.lanUrls || []).join("  ")}`
-        : "";
+    if (state.info) {
+        const urls = state.info.lanUrls || [];
+        $("lan-hint").textContent = urls.length
+            ? `${state.info.hintJa} ${urls.join("  ")}`
+            : "手机/iPad打不开时：请确认和电脑在同一个 Wi-Fi，并用电脑的 Wi-Fi IP 打开，例如 http://192.168.x.x:8080。云端机器的 172.x 地址手机通常打不开。";
+    } else {
+        $("lan-hint").textContent = "";
+    }
     const row = $("avatar-row");
     row.innerHTML = "";
     AVATARS.forEach((avatar) => {

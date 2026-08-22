@@ -42,6 +42,29 @@ func TestHandleCatalog(t *testing.T) {
 	}
 }
 
+func TestHandleServerInfoIncludesPublicURL(t *testing.T) {
+	t.Setenv("PUBLIC_URL", "https://learn.example.com")
+	req := httptest.NewRequest(http.MethodGet, "/api/server-info", nil)
+	rec := httptest.NewRecorder()
+	HandleServerInfo(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d", rec.Code)
+	}
+	var info struct {
+		PublicURL string   `json:"publicUrl"`
+		LANURLs   []string `json:"lanUrls"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &info); err != nil {
+		t.Fatal(err)
+	}
+	if info.PublicURL != "https://learn.example.com" {
+		t.Fatalf("public URL %q", info.PublicURL)
+	}
+	if len(info.LANURLs) == 0 || info.LANURLs[0] != "https://learn.example.com" {
+		t.Fatalf("lan URLs should start with public URL: %#v", info.LANURLs)
+	}
+}
+
 func TestHandleInterestPost(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/interest", strings.NewReader(`{"text":"C罗"}`))
 	req.Header.Set("Content-Type", "application/json")

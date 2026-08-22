@@ -1,6 +1,9 @@
 package learn
 
-import "testing"
+import (
+	"net"
+	"testing"
+)
 
 func TestAddChildProgressIsIndependent(t *testing.T) {
 	dir := t.TempDir()
@@ -47,6 +50,21 @@ func TestBuildGameHasTappableItems(t *testing.T) {
 		}
 		if len(game.Items) == 0 {
 			t.Fatalf("day %d has empty game", day)
+		}
+	}
+}
+
+func TestReachableLANFilterSkipsContainerRanges(t *testing.T) {
+	cases := map[string]bool{
+		"192.168.1.20": true,
+		"10.0.0.8":     true,
+		"172.17.0.1":   false,
+		"172.30.0.2":   false,
+		"127.0.0.1":    false,
+	}
+	for raw, want := range cases {
+		if got := isLikelyPhoneReachableIPv4(net.ParseIP(raw)); got != want {
+			t.Fatalf("%s got %v want %v", raw, got, want)
 		}
 	}
 }
