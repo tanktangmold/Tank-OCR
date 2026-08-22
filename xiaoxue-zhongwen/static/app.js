@@ -22,6 +22,9 @@ const state = {
     seconds: 0,
     timer: null,
     style: localStorage.getItem("learn-style") || "comic",
+    voice: localStorage.getItem("learn-voice") || "xiaoxiao",
+    voices: [],
+    audio: null,
     avatar: "⚽",
     screen: "kids",
     practice: [],
@@ -43,7 +46,10 @@ function showScreen(name) {
     if (state.child) {
         $("child-chip").textContent = `${state.child.avatar} ${state.child.name}`;
     }
-    if (name !== "lesson") stopTimer();
+    if (name !== "lesson") {
+        stopTimer();
+        stopSpeak();
+    }
 }
 
 function sceneUrl(style, scene) {
@@ -51,29 +57,77 @@ function sceneUrl(style, scene) {
     return `images/${style}/${id}.webp`;
 }
 
+function lineImageUrl(day, line, style) {
+    return `/api/image?day=${day}&line=${line}&style=${encodeURIComponent(style)}`;
+}
+
 function pickChineseVoice() {
     const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    const want = VoiceById(state.voice);
+    const zh = voices.filter((v) => /zh|chinese|中文|普通话|台灣|台湾/i.test(`${v.name} ${v.lang}`));
+    if (want.gender === "male") {
+        return (
+            zh.find((v) => /male|男|yun|kang|kangkang|yunyang|yunxi|yunjian/i.test(`${v.name} ${v.lang}`)) ||
+            zh[0] ||
+            null
+        );
+    }
     return (
-        voices.find((v) => /^zh(-|$)/i.test(v.lang.replace("_", "-"))) ||
-        voices.find((v) => /chinese|中文|普通话|台灣|台湾/i.test(`${v.name} ${v.lang}`)) ||
+        zh.find((v) => /female|女|ting|xiao|hui|yao|meijia/i.test(`${v.name} ${v.lang}`)) ||
+        zh[0] ||
         null
     );
 }
 
-function speakChinese(text, onend) {
+function VoiceById(id) {
+    return (state.voices || []).find((v) => v.id === id) || { id: "xiaoxiao", gender: "female", pitch: 1.1, rate: 0.9 };
+}
+
+function stopSpeak() {
+    if (state.audio) {
+        state.audio.pause();
+        state.audio.src = "";
+        state.audio = null;
+    }
+    if (window.speechSynthesis) speechSynthesis.cancel();
+}
+
+function speakWeb(text, onend, profile) {
     if (!window.speechSynthesis || !text) {
         if (onend) onend();
         return;
     }
-    speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     const voice = pickChineseVoice();
     utter.lang = voice ? voice.lang : "zh-CN";
     if (voice) utter.voice = voice;
-    utter.rate = 0.88;
+    utter.rate = profile.rate || 0.88;
+    utter.pitch = profile.pitch || 1;
     utter.onend = () => onend && onend();
     utter.onerror = () => onend && onend();
     speechSynthesis.speak(utter);
+}
+
+function speakChinese(text, onend) {
+    stopSpeak();
+    const profile = VoiceById(state.voice);
+    if (!text) {
+        if (onend) onend();
+        return;
+    }
+    const url = `/api/tts?voice=${encodeURIComponent(profile.id)}&text=${encodeURIComponent(text)}`;
+    const audio = new Audio(url);
+    state.audio = audio;
+    const done = () => {
+        if (state.audio === audio) state.audio = null;
+        if (onend) onend();
+    };
+    audio.onended = done;
+    audio.onerror = () => speakWeb(text, onend, profile);
+    const play = audio.play();
+    if (play && play.catch) {
+        play.catch(() => speakWeb(text, onend, profile));
+    }
 }
 
 function markHeard(index) {
@@ -92,7 +146,9 @@ async function api(url, opts) {
 async function loadKids() {
     state.children = await api("/api/children");
     state.info = await api("/api/server-info").catch(() => null);
+    state.voices = await api("/api/voices").catch(() => []);
     renderKids();
+    renderVoices();
 }
 
 function renderKids() {
@@ -176,6 +232,7 @@ async function openDay(day) {
     state.heard = new Set(st && st.heard ? st.heard : []);
     state.seconds = st && st.seconds ? st.seconds : 0;
     renderStyles();
+    renderVoices();
     renderLesson();
     showScreen("lesson");
     startTimer();
@@ -225,25 +282,59 @@ function renderStyles() {
     });
 }
 
+function renderVoices() {
+    const bar = $("voice-bar");
+    if (!bar) return;
+    bar.innerHTML = "";
+    (state.voices || []).forEach((voice) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "voice-btn" + (voice.id === state.voice ? " active" : "");
+        btn.textContent = `${voice.gender === "female" ? "♀" : "♂"} ${voice.nameJa}`;
+        btn.addEventListener("click", () => {
+            state.voice = voice.id;
+            localStorage.setItem("learn-voice", voice.id);
+            renderVoices();
+            speakChinese("你好，我是" + voice.nameZh);
+        });
+        bar.appendChild(btn);
+    });
+}
+
 function renderLesson() {
     const beat = currentBeat();
     const lesson = state.lesson;
     $("day-moral").textContent = `${lesson.title.ja}　${lesson.moral.ja}`;
     const img = $("scene-image");
+    const frame = $("picture-frame");
+    const loading = $("picture-loading");
+    const src = lineImageUrl(state.day, state.index, state.style);
+    if (frame) frame.classList.add("loading");
+    if (loading) loading.hidden = false;
+    img.onload = () => {
+        if (frame) frame.classList.remove("loading");
+        if (loading) loading.hidden = true;
+    };
     img.onerror = () => {
         img.onerror = null;
-        img.src = sceneUrl(state.style, "intro");
+        img.src = sceneUrl(state.style, beat.scene || lesson.scene);
+        if (loading) loading.hidden = true;
+        if (frame) frame.classList.remove("loading");
     };
-    img.src = sceneUrl(state.style, beat.scene || lesson.scene);
-    img.alt = lesson.title.ja;
-    $("scene-caption").textContent = `${lesson.day}日目 · ${state.index + 1} / ${lesson.lines.length}`;
+    img.src = src;
+    img.alt = beat.sentence.zh;
+    $("scene-caption").textContent = `${lesson.day}日目 · ${state.index + 1} / ${lesson.lines.length}　${beat.sentence.zh}`;
+    if (state.index + 1 < lesson.lines.length) {
+        const preload = new Image();
+        preload.src = lineImageUrl(state.day, state.index + 1, state.style);
+    }
     $("pattern-card").innerHTML = `<div class="pattern-label">句型</div>
         <p class="pattern-zh">${escapeHtml(beat.pattern.zh)}</p>
         <p class="pattern-ja">${escapeHtml(beat.pattern.ja)}</p>`;
     $("sentence-pinyin").textContent = beat.sentence.pinyin;
     $("sentence-ja").textContent = beat.sentence.ja;
     $("sentence-words").innerHTML = "";
-    (beat.sentence.tokens || []).forEach((token, i) => {
+    (beat.sentence.tokens || []).forEach((token) => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "word";

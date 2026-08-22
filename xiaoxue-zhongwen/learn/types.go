@@ -38,9 +38,10 @@ type Sentence struct {
 
 // Beat is one story step: picture + pattern + one sentence.
 type Beat struct {
-	Scene    string   `json:"scene"`
-	Pattern  Pattern  `json:"pattern"`
-	Sentence Sentence `json:"sentence"`
+	Scene       string   `json:"scene"`
+	ImagePrompt string   `json:"imagePrompt"`
+	Pattern     Pattern  `json:"pattern"`
+	Sentence    Sentence `json:"sentence"`
 }
 
 // Character is the person (or animal) the story is about.

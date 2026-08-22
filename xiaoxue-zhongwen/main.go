@@ -22,6 +22,8 @@ func main() {
 		wd, _ := os.Getwd()
 		learn.SetClassroomPath(filepath.Join(wd, "data", "classroom.json"))
 	}
+	wd, _ := os.Getwd()
+	learn.SetMediaPaths(filepath.Join(wd, "data", "media"), getStaticDir())
 
 	staticDir := getStaticDir()
 	mux := http.NewServeMux()
@@ -35,6 +37,9 @@ func main() {
 	mux.HandleFunc("/api/children/{id}/progress", handler.HandleChildProgress)
 	mux.HandleFunc("/api/game/{day}", handler.HandleGame)
 	mux.HandleFunc("/api/server-info", handler.HandleServerInfo)
+	mux.HandleFunc("/api/voices", handler.HandleVoices)
+	mux.HandleFunc("/api/tts", handler.HandleTTS)
+	mux.HandleFunc("/api/image", handler.HandleSentenceImage)
 	mux.Handle("/", http.FileServer(http.Dir(staticDir)))
 
 	log.Printf("小小中文 listening on http://%s", addr)
@@ -45,7 +50,7 @@ func main() {
 		Handler:           withLocalHeaders(mux),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      60 * time.Second,
+		WriteTimeout:      2 * time.Minute,
 		IdleTimeout:       60 * time.Second,
 	}
 	if err := server.ListenAndServe(); err != nil {

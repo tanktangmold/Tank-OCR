@@ -50,7 +50,8 @@ func buildLine(raw rawLine, scene string) Beat {
 		}
 	}
 	return Beat{
-		Scene: scene,
+		Scene:       scene,
+		ImagePrompt: SentenceImagePrompt(raw.zh, scene, "comic"),
 		Pattern: Pattern{
 			ZH: raw.patZH,
 			JA: raw.patJA,
@@ -123,6 +124,9 @@ func ValidateCourse(course Course) error {
 		for j, beat := range day.Lines {
 			if err := validateBeat(fmt.Sprintf("day-%d", day.Day), j, beat); err != nil {
 				return err
+			}
+			if strings.TrimSpace(beat.ImagePrompt) == "" {
+				return fmt.Errorf("day %d line %d missing image prompt", day.Day, j)
 			}
 			for _, token := range beat.Sentence.Tokens {
 				if token.Pinyin == "" {
