@@ -33,3 +33,12 @@ func TestHandleVoicesHasMaleAndFemale(t *testing.T) {
 		t.Fatalf("female=%d male=%d", female, male)
 	}
 }
+
+func TestHandleTTSRequiresText(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/tts?voice=xiaoxiao", nil)
+	rec := httptest.NewRecorder()
+	HandleTTS(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status %d", rec.Code)
+	}
+}

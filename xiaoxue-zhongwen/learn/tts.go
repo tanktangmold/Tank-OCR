@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -31,6 +32,16 @@ var Voices = []Voice{
 	{ID: "yunjian", NameZH: "云健", NameJA: "男声・先生", Gender: "male", Edge: "zh-CN-YunjianNeural", Pitch: 0.62, Rate: 0.85},
 }
 
+var (
+	ttsLocks sync.Map
+	ttsSlot  = make(chan struct{}, 1) // one edge-tts process at a time
+)
+
+func ttsLock(path string) *sync.Mutex {
+	v, _ := ttsLocks.LoadOrStore(path, &sync.Mutex{})
+	return v.(*sync.Mutex)
+}
+
 // VoiceByID returns a catalog voice or the default girl voice.
 func VoiceByID(id string) Voice {
 	for _, voice := range Voices {
@@ -41,23 +52,39 @@ func VoiceByID(id string) Voice {
 	return Voices[0]
 }
 
+// TTSCachePath is the on-disk mp3 for this text and voice.
+func TTSCachePath(text, voiceID string) string {
+	voice := VoiceByID(voiceID)
+	sum := sha1.Sum([]byte(voice.ID + "|" + strings.TrimSpace(text)))
+	return filepath.Join(mediaDir, "tts", fmt.Sprintf("%s-%x.mp3", voice.ID, sum[:8]))
+}
+
+func ttsReady(path string) bool {
+	st, err := os.Stat(path)
+	return err == nil && st.Size() > 200
+}
+
 // EnsureTTS writes an mp3 of text in the chosen Chinese voice.
 func EnsureTTS(text, voiceID string) (string, error) {
 	text = strings.TrimSpace(text)
 	if text == "" {
 		return "", fmt.Errorf("empty text")
 	}
-	voice := VoiceByID(voiceID)
-	sum := sha1.Sum([]byte(voice.ID + "|" + text))
-	path := filepath.Join(mediaDir, "tts", fmt.Sprintf("%s-%x.mp3", voice.ID, sum[:8]))
-	if st, err := os.Stat(path); err == nil && st.Size() > 200 {
+	path := TTSCachePath(text, voiceID)
+	if ttsReady(path) {
+		return path, nil
+	}
+	lock := ttsLock(path)
+	lock.Lock()
+	defer lock.Unlock()
+	if ttsReady(path) {
 		return path, nil
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return "", err
 	}
 	tmp := path + ".tmp.mp3"
-	if err := runEdgeTTS(text, voice.Edge, tmp); err != nil {
+	if err := runEdgeTTS(text, VoiceByID(voiceID).Edge, tmp); err != nil {
 		_ = os.Remove(tmp)
 		return "", err
 	}
@@ -68,6 +95,9 @@ func EnsureTTS(text, voiceID string) (string, error) {
 }
 
 func runEdgeTTS(text, edgeVoice, dest string) error {
+	ttsSlot <- struct{}{}
+	defer func() { <-ttsSlot }()
+
 	script := `
 import asyncio, sys, edge_tts
 text, voice, path = sys.argv[1], sys.argv[2], sys.argv[3]

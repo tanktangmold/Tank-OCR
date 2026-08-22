@@ -25,6 +25,9 @@ const state = {
     voice: localStorage.getItem("learn-voice") || "xiaoxiao",
     voices: [],
     audio: null,
+    speakSeq: 0,
+    slowRun: 0,
+    speakFinish: null,
     avatar: "⚽",
     screen: "kids",
     practice: [],
@@ -83,18 +86,104 @@ function VoiceById(id) {
     return (state.voices || []).find((v) => v.id === id) || { id: "xiaoxiao", gender: "female", pitch: 1.1, rate: 0.9 };
 }
 
-function stopSpeak() {
-    if (state.audio) {
-        state.audio.pause();
-        state.audio.src = "";
-        state.audio = null;
-    }
-    if (window.speechSynthesis) speechSynthesis.cancel();
+const ttsBlobs = new Map();
+const ttsPending = new Map();
+
+function ttsKey(text) {
+    return `${state.voice}|${String(text || "").trim()}`;
 }
 
-function speakWeb(text, onend, profile) {
+function ttsApiUrl(text) {
+    return `/api/tts?voice=${encodeURIComponent(state.voice)}&text=${encodeURIComponent(text)}`;
+}
+
+function rememberTts(key, url) {
+    if (ttsBlobs.has(key)) ttsBlobs.delete(key);
+    ttsBlobs.set(key, url);
+    while (ttsBlobs.size > 80) {
+        const oldest = ttsBlobs.keys().next().value;
+        ttsBlobs.delete(oldest);
+    }
+}
+
+function fetchTtsBlob(text) {
+    text = String(text || "").trim();
+    if (!text) return Promise.resolve("");
+    const key = ttsKey(text);
+    if (ttsBlobs.has(key)) return Promise.resolve(ttsBlobs.get(key));
+    if (ttsPending.has(key)) return ttsPending.get(key);
+    const pending = fetch(ttsApiUrl(text))
+        .then((res) => {
+            if (!res.ok) throw new Error("tts failed");
+            return res.blob();
+        })
+        .then((blob) => {
+            const url = URL.createObjectURL(blob);
+            rememberTts(key, url);
+            ttsPending.delete(key);
+            return url;
+        })
+        .catch((err) => {
+            ttsPending.delete(key);
+            throw err;
+        });
+    ttsPending.set(key, pending);
+    return pending;
+}
+
+function prefetchTts(texts) {
+    const seen = new Set();
+    (texts || []).forEach((text) => {
+        text = String(text || "").trim();
+        if (!text || seen.has(text)) return;
+        seen.add(text);
+        fetchTtsBlob(text).catch(() => {});
+    });
+}
+
+function prefetchLessonAudio() {
+    if (!state.lesson) return;
+    const beat = currentBeat();
+    const texts = [beat.sentence.zh];
+    (beat.sentence.tokens || []).forEach((token) => texts.push(token.zh));
+    const next = state.lesson.lines[state.index + 1];
+    if (next) texts.push(next.sentence.zh);
+    prefetchTts(texts);
+}
+
+function detachAudio(audio) {
+    if (!audio) return;
+    audio.onended = null;
+    audio.onerror = null;
+    audio.oncanplay = null;
+    audio.oncanplaythrough = null;
+    try {
+        audio.pause();
+    } catch (_) {}
+    try {
+        audio.removeAttribute("src");
+        audio.load();
+    } catch (_) {}
+}
+
+function takeSpeakFinish() {
+    const fn = state.speakFinish;
+    state.speakFinish = null;
+    if (fn) fn();
+}
+
+function stopSpeak(opts) {
+    state.speakSeq += 1;
+    if (!opts || !opts.keepSlow) state.slowRun += 1;
+    detachAudio(state.audio);
+    state.audio = null;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    takeSpeakFinish();
+}
+
+function speakWeb(text, onend, profile, seq) {
     if (!window.speechSynthesis || !text) {
-        if (onend) onend();
+        if (seq === state.speakSeq && onend) onend();
         return;
     }
     const utter = new SpeechSynthesisUtterance(text);
@@ -103,31 +192,74 @@ function speakWeb(text, onend, profile) {
     if (voice) utter.voice = voice;
     utter.rate = profile.rate || 0.88;
     utter.pitch = profile.pitch || 1;
-    utter.onend = () => onend && onend();
-    utter.onerror = () => onend && onend();
+    utter.onend = () => {
+        if (seq !== state.speakSeq) return;
+        if (onend) onend();
+    };
+    utter.onerror = () => {
+        if (seq !== state.speakSeq) return;
+        if (onend) onend();
+    };
     speechSynthesis.speak(utter);
 }
 
-function speakChinese(text, onend) {
-    stopSpeak();
-    const profile = VoiceById(state.voice);
-    if (!text) {
-        if (onend) onend();
-        return;
-    }
-    const url = `/api/tts?voice=${encodeURIComponent(profile.id)}&text=${encodeURIComponent(text)}`;
-    const audio = new Audio(url);
+function playAudioSrc(src, text, onend, profile, seq) {
+    const audio = new Audio();
+    audio.preload = "auto";
     state.audio = audio;
+    const alive = () => seq === state.speakSeq && state.audio === audio;
     const done = () => {
+        if (!alive()) return;
+        detachAudio(audio);
         if (state.audio === audio) state.audio = null;
         if (onend) onend();
     };
     audio.onended = done;
-    audio.onerror = () => speakWeb(text, onend, profile);
-    const play = audio.play();
-    if (play && play.catch) {
-        play.catch(() => speakWeb(text, onend, profile));
+    audio.onerror = () => {
+        if (!alive()) return;
+        detachAudio(audio);
+        if (state.audio === audio) state.audio = null;
+        speakWeb(text, onend, profile, seq);
+    };
+    audio.src = src;
+    const tryPlay = () => {
+        if (!alive()) return;
+        const play = audio.play();
+        if (play && play.catch) {
+            play.catch(() => {
+                if (!alive()) return;
+                const retry = () => {
+                    if (!alive()) return;
+                    audio.play().catch(() => {});
+                };
+                audio.addEventListener("canplay", retry, { once: true });
+            });
+        }
+    };
+    tryPlay();
+}
+
+function speakChinese(text, onend, opts) {
+    stopSpeak(opts);
+    const seq = state.speakSeq;
+    const profile = VoiceById(state.voice);
+    const finish = () => {
+        if (state.speakFinish === finish) state.speakFinish = null;
+        if (onend) {
+            const cb = onend;
+            onend = null;
+            cb();
+        }
+    };
+    state.speakFinish = finish;
+    text = String(text || "").trim();
+    if (!text) {
+        finish();
+        return;
     }
+    const cached = ttsBlobs.get(ttsKey(text));
+    playAudioSrc(cached || ttsApiUrl(text), text, finish, profile, seq);
+    if (!cached) fetchTtsBlob(text).catch(() => {});
 }
 
 function markHeard(index) {
@@ -295,6 +427,7 @@ function renderVoices() {
             state.voice = voice.id;
             localStorage.setItem("learn-voice", voice.id);
             renderVoices();
+            prefetchLessonAudio();
             speakChinese("你好，我是" + voice.nameZh);
         });
         bar.appendChild(btn);
@@ -351,6 +484,7 @@ function renderLesson() {
     const last = state.index === lesson.lines.length - 1;
     const allHeard = lesson.lines.every((_, i) => state.heard.has(i));
     $("next-btn").textContent = last && allHeard ? "15分クリアへ" : last ? "ぜんぶ聞こう" : "つぎの文";
+    prefetchLessonAudio();
 }
 
 function renderDots() {
@@ -613,10 +747,14 @@ $("prev-btn").addEventListener("click", () => go(-1));
 $("next-btn").addEventListener("click", () => go(1));
 $("slow-btn").addEventListener("click", async () => {
     const beat = currentBeat();
+    const runId = state.slowRun + 1;
+    state.slowRun = runId;
     for (const token of beat.sentence.tokens || []) {
-        await new Promise((resolve) => speakChinese(token.zh, resolve));
+        if (runId !== state.slowRun) return;
+        await new Promise((resolve) => speakChinese(token.zh, resolve, { keepSlow: true }));
+        if (runId !== state.slowRun) return;
     }
-    markHeard(state.index);
+    if (runId === state.slowRun) markHeard(state.index);
 });
 $("open-game-btn").addEventListener("click", openGame);
 $("back-calendar-btn").addEventListener("click", () => {
