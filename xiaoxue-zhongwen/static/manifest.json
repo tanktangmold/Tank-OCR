@@ -1,0 +1,9 @@
+{
+  "name": "小小中文",
+  "short_name": "小小中文",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6efe2",
+  "theme_color": "#1d7a6f",
+  "lang": "ja"
+}

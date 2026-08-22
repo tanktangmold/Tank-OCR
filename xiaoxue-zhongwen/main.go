@@ -8,12 +8,19 @@ import (
 	"time"
 
 	"xiaoxue-zhongwen/handler"
+	"xiaoxue-zhongwen/learn"
 )
 
 func main() {
 	addr := os.Getenv("LISTEN_ADDR")
 	if addr == "" {
-		addr = "127.0.0.1:8080"
+		addr = "0.0.0.0:8080"
+	}
+	if path := os.Getenv("CLASSROOM_PATH"); path != "" {
+		learn.SetClassroomPath(path)
+	} else {
+		wd, _ := os.Getwd()
+		learn.SetClassroomPath(filepath.Join(wd, "data", "classroom.json"))
 	}
 
 	staticDir := getStaticDir()
@@ -22,6 +29,12 @@ func main() {
 	mux.HandleFunc("/api/interest", handler.HandleInterest)
 	mux.HandleFunc("/api/books", handler.HandleBooks)
 	mux.HandleFunc("/api/story/{id}", handler.HandleStory)
+	mux.HandleFunc("/api/course", handler.HandleCourse)
+	mux.HandleFunc("/api/course/day/{day}", handler.HandleCourseDay)
+	mux.HandleFunc("/api/children", handler.HandleChildren)
+	mux.HandleFunc("/api/children/{id}/progress", handler.HandleChildProgress)
+	mux.HandleFunc("/api/game/{day}", handler.HandleGame)
+	mux.HandleFunc("/api/server-info", handler.HandleServerInfo)
 	mux.Handle("/", http.FileServer(http.Dir(staticDir)))
 
 	log.Printf("小小中文 listening on http://%s", addr)

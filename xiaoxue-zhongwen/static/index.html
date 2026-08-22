@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小小中文">
     <title>小小中文 · ちいさな中国語</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,86 +18,89 @@
             <div class="brand-mark" aria-hidden="true">⚽</div>
             <div class="brand-copy">
                 <strong>小小中文</strong>
-                <span>ちいさな中国語</span>
+                <span id="brand-sub">Cロ 30日コース</span>
             </div>
             <div class="top-actions">
-                <button class="chip-btn" id="lang-hint-btn" type="button">日本語</button>
+                <button class="chip-btn" id="child-chip" type="button" hidden></button>
             </div>
         </header>
 
-        <section class="screen active" id="screen-home" data-screen="home">
-            <div class="hero">
-                <div class="mascot" aria-hidden="true">
-                    <svg viewBox="0 0 160 140" role="img">
-                        <ellipse cx="80" cy="128" rx="48" ry="8" fill="#000" opacity=".08"/>
-                        <circle cx="80" cy="72" r="42" fill="#f7f2ea" stroke="#2c2416" stroke-width="3"/>
-                        <circle cx="58" cy="48" r="16" fill="#2c2416"/>
-                        <circle cx="102" cy="48" r="16" fill="#2c2416"/>
-                        <circle cx="62" cy="70" r="7" fill="#2c2416"/>
-                        <circle cx="98" cy="70" r="7" fill="#2c2416"/>
-                        <circle cx="64" cy="68" r="2.2" fill="#fff"/>
-                        <circle cx="100" cy="68" r="2.2" fill="#fff"/>
-                        <ellipse cx="80" cy="86" rx="8" ry="6" fill="#2c2416"/>
-                        <path d="M68 98 Q80 110 92 98" fill="none" stroke="#2c2416" stroke-width="3" stroke-linecap="round"/>
-                        <circle cx="118" cy="108" r="16" fill="#f4f4f4" stroke="#2c2416" stroke-width="3"/>
-                        <path d="M118 92 L118 124 M102 108 L134 108" stroke="#2c2416" stroke-width="2"/>
-                        <polygon points="118,96 123,108 118,106 113,108" fill="#2c2416"/>
-                    </svg>
+        <section class="screen active" id="screen-kids" data-screen="kids">
+            <h1>だれが学ぶ？</h1>
+            <p class="lead">iPadでおしてね。何人でも同時に使えるよ。ひとりずつ、自分の顔を選ぶ。</p>
+            <div class="kid-grid" id="kid-grid"></div>
+            <form class="add-kid" id="add-kid">
+                <p class="agent-name">あたらしいこども</p>
+                <div class="avatar-row" id="avatar-row"></div>
+                <input id="kid-name" type="text" maxlength="12" placeholder="なまえ" autocomplete="off" enterkeyhint="done">
+                <button type="submit" class="primary-btn">つくる</button>
+            </form>
+            <p class="muted" id="lan-hint"></p>
+        </section>
+
+        <section class="screen" id="screen-calendar" data-screen="calendar">
+            <div class="hero-mini">
+                <h1 id="calendar-title">30日のCロ物語</h1>
+                <p class="lead" id="calendar-lead">毎日15分。終わったら、ゲームが1つひらく。</p>
+            </div>
+            <div class="week-legend">1週: 島　2週: 旅立ち　3週: 手術と努力　4週: 選手へ</div>
+            <div class="month-grid" id="month-grid"></div>
+        </section>
+
+        <section class="screen" id="screen-lesson" data-screen="lesson">
+            <div class="lesson-top">
+                <div class="timer-card">
+                    <span>きょうの15分</span>
+                    <strong id="timer-label">00:00</strong>
                 </div>
-                <h1>すきなもので、<br>中国語を学ぼう</h1>
-                <p class="lead">サッカーでも、えほんでもいいよ。リンリンが話を見つけて、かんたんな中国語を一文ずつ読んでくれる。</p>
-            </div>
-
-            <div class="agent-card">
-                <p class="agent-name">パンダのリンリン</p>
-                <p class="agent-bubble" id="home-bubble">きょうは、なにがすき？</p>
-                <div class="interest-grid" id="interest-grid"></div>
-                <form class="ask-form" id="ask-form">
-                    <label class="sr-only" for="interest-input">すきなものを入力</label>
-                    <input id="interest-input" type="text" maxlength="40" placeholder="例: サッカー、Cロナウド、えほん" autocomplete="off">
-                    <button type="submit" class="primary-btn">さがす</button>
-                </form>
-            </div>
-        </section>
-
-        <section class="screen" id="screen-match" data-screen="match">
-            <div class="agent-card">
-                <p class="agent-name">パンダのリンリン</p>
-                <p class="agent-bubble" id="match-bubble"></p>
-                <p class="agent-bubble zh" id="match-bubble-zh" hidden></p>
-            </div>
-            <h2 class="section-title">よめる話</h2>
-            <div class="story-list" id="story-list"></div>
-            <h2 class="section-title">関連する本 <span>本文はコピーしないよ</span></h2>
-            <div class="book-list" id="book-list">
-                <p class="muted">本を探しています…</p>
-            </div>
-        </section>
-
-        <section class="screen" id="screen-reader" data-screen="reader">
-            <div class="reader">
                 <div class="style-bar" id="style-bar" role="tablist" aria-label="絵のスタイル"></div>
+            </div>
+            <div class="lesson-grid">
                 <figure class="picture-frame">
                     <img id="scene-image" alt="物語の絵">
                     <figcaption id="scene-caption"></figcaption>
                 </figure>
-                <div class="pattern-card" id="pattern-card"></div>
-                <button type="button" class="sentence-card" id="sentence-card" aria-label="文を聞く">
-                    <p class="pinyin" id="sentence-pinyin"></p>
-                    <p class="sentence" id="sentence-words"></p>
-                    <p class="ja" id="sentence-ja"></p>
-                    <span class="listen-hint">文をおすと、中国語でよむよ</span>
-                </button>
-                <div class="progress-path" id="progress-path" aria-label="物語の進み"></div>
-                <div class="reader-nav">
-                    <button type="button" class="nav-btn" id="prev-btn">まえの文</button>
-                    <button type="button" class="nav-btn slow" id="slow-btn">ゆっくり</button>
-                    <button type="button" class="nav-btn next" id="next-btn">つぎの文</button>
+                <div class="lesson-copy">
+                    <p class="day-moral" id="day-moral"></p>
+                    <div class="pattern-card" id="pattern-card"></div>
+                    <button type="button" class="sentence-card" id="sentence-card" aria-label="文を聞く">
+                        <p class="pinyin" id="sentence-pinyin"></p>
+                        <p class="sentence" id="sentence-words"></p>
+                        <p class="ja" id="sentence-ja"></p>
+                        <span class="listen-hint">字をおす・文をおすと、中国語でよむよ</span>
+                    </button>
+                    <div class="progress-path" id="progress-path"></div>
+                    <div class="reader-nav">
+                        <button type="button" class="nav-btn" id="prev-btn">まえ</button>
+                        <button type="button" class="nav-btn slow" id="slow-btn">ゆっくり</button>
+                        <button type="button" class="nav-btn next" id="next-btn">つぎ</button>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <section class="screen" id="screen-practice" data-screen="practice">
+            <h1>あと少し！</h1>
+            <p class="lead">4問できたら、15分コースクリア。そのあとゲーム。</p>
+            <div class="practice-card" id="practice-card"></div>
+        </section>
+
+        <section class="screen" id="screen-reward" data-screen="reward">
+            <div class="reward">
+                <p class="stamp">⚽</p>
+                <h1 id="reward-title">15分できた！</h1>
+                <p class="lead" id="reward-moral"></p>
+                <button type="button" class="primary-btn big" id="open-game-btn">ゲームを1つプレイ</button>
+                <button type="button" class="nav-btn" id="back-calendar-btn">カレンダーへ</button>
+            </div>
+        </section>
+
+        <section class="screen" id="screen-game" data-screen="game">
+            <h1 id="game-title">ゲーム</h1>
+            <p class="lead" id="game-hint"></p>
+            <div class="game-board" id="game-board"></div>
+        </section>
     </div>
-    <p class="footer-note">学習用の中国語は、短いオリジナル文です。関連本は保護者向けの手がかりです。</p>
     <script src="app.js"></script>
 </body>
 </html>
