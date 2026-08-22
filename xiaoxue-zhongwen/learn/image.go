@@ -22,21 +22,21 @@ func SetMediaPaths(media, static string) {
 	staticDir = static
 }
 
-// SentenceImagePrompt builds a cheap-model prompt that matches this Chinese line.
+// SentenceImagePrompt builds a stable cache key that follows this Chinese line.
 func SentenceImagePrompt(zh, scene, style string) string {
 	look := styleLook(style)
 	visual := sentenceVisual(zh, scene)
-	return look + " Curly-haired boy, red football shirt, kid-safe. " + visual + ". No text."
+	return look + " Curly-haired boy, red football shirt, kid-safe. " + visual + "."
 }
 
 func styleLook(style string) string {
 	switch style {
 	case "picturebook":
-		return "Cheap children's watercolor picture book illustration, soft pastel, paper texture."
+		return "local children's watercolor picture book illustration, soft pastel, paper texture."
 	case "realistic":
-		return "Inexpensive gentle painterly children's illustration, natural light, not photographic."
+		return "local gentle painterly children's illustration, natural light, simple shapes."
 	default:
-		return "Cheap kids comic illustration, thick ink outlines, bright flat colors, cel shading."
+		return "local kids comic illustration, thick ink outlines, bright flat colors."
 	}
 }
 

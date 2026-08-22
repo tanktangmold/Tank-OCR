@@ -25,6 +25,7 @@ const state = {
     voice: localStorage.getItem("learn-voice") || "xiaoxiao",
     voices: [],
     audio: null,
+    imageLoadTimer: null,
     speakSeq: 0,
     slowRun: 0,
     speakFinish: null,
@@ -445,13 +446,24 @@ function renderLesson() {
     const frame = $("picture-frame");
     const loading = $("picture-loading");
     const src = lineImageUrl(state.day, state.index, state.style);
-    if (frame) frame.classList.add("loading");
-    if (loading) loading.hidden = false;
+    if (state.imageLoadTimer) clearTimeout(state.imageLoadTimer);
+    let imageDone = false;
+    if (frame) frame.classList.remove("loading");
+    if (loading) loading.hidden = true;
+    state.imageLoadTimer = setTimeout(() => {
+        if (imageDone) return;
+        if (frame) frame.classList.add("loading");
+        if (loading) loading.hidden = false;
+    }, 250);
     img.onload = () => {
+        imageDone = true;
+        if (state.imageLoadTimer) clearTimeout(state.imageLoadTimer);
         if (frame) frame.classList.remove("loading");
         if (loading) loading.hidden = true;
     };
     img.onerror = () => {
+        imageDone = true;
+        if (state.imageLoadTimer) clearTimeout(state.imageLoadTimer);
         img.onerror = null;
         img.src = sceneUrl(state.style, beat.scene || lesson.scene);
         if (loading) loading.hidden = true;
