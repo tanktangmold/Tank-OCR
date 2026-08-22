@@ -59,7 +59,9 @@ func HandleSentenceImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctype := "image/jpeg"
-	if strings.HasSuffix(path, ".webp") {
+	if strings.HasSuffix(path, ".svg") {
+		ctype = "image/svg+xml"
+	} else if strings.HasSuffix(path, ".webp") {
 		ctype = "image/webp"
 	}
 	serveMedia(w, r, path, ctype)

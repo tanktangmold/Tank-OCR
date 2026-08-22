@@ -20,6 +20,26 @@ func TestSentenceImagePromptDiffersByLine(t *testing.T) {
 	}
 }
 
+func TestEnsureSentenceImageIsLocalSVG(t *testing.T) {
+	prevMedia, prevStatic := mediaDir, staticDir
+	t.Cleanup(func() { SetMediaPaths(prevMedia, prevStatic) })
+	SetMediaPaths(t.TempDir(), "static")
+	path, err := EnsureSentenceImage("他在小岛上踢足球。", "island", "comic")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Ext(path) != ".svg" {
+		t.Fatalf("image should be a local svg, got %s", path)
+	}
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), "<svg") || !strings.Contains(string(body), "踢足球") {
+		t.Fatalf("unexpected svg body: %.80s", string(body))
+	}
+}
+
 func TestVoicesIncludeFemaleAndMale(t *testing.T) {
 	var female, male int
 	for _, voice := range Voices {

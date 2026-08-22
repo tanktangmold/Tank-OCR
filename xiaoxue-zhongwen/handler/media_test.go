@@ -42,3 +42,16 @@ func TestHandleTTSRequiresText(t *testing.T) {
 		t.Fatalf("status %d", rec.Code)
 	}
 }
+
+func TestHandleSentenceImageServesLocalSVG(t *testing.T) {
+	learn.SetMediaPaths(t.TempDir(), "static")
+	req := httptest.NewRequest(http.MethodGet, "/api/image?day=1&line=0&style=comic", nil)
+	rec := httptest.NewRecorder()
+	HandleSentenceImage(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d: %s", rec.Code, rec.Body.String())
+	}
+	if got := rec.Header().Get("Content-Type"); got != "image/svg+xml" {
+		t.Fatalf("content type %q", got)
+	}
+}

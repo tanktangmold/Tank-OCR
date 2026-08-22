@@ -3,23 +3,17 @@ package learn
 import (
 	"crypto/sha1"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
+	"html"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 )
 
 var (
-	mediaDir    = "data/media"
-	staticDir   = "static"
-	imageClient = &http.Client{Timeout: 45 * time.Second}
-	imageLocks  sync.Map
-	imageAPI    = "https://image.pollinations.ai/prompt/"
-	imageModel  = "turbo" // cheapest / fastest public model
+	mediaDir   = "data/media"
+	staticDir  = "static"
+	imageLocks sync.Map
 )
 
 // SetMediaPaths sets cache and fallback image directories.
@@ -138,34 +132,35 @@ func sceneVisual(scene string) string {
 // ImageCachePath is the on-disk file for a generated sentence picture.
 func ImageCachePath(style, prompt string) string {
 	sum := sha1.Sum([]byte(style + "|" + prompt))
-	name := fmt.Sprintf("%x.jpg", sum[:10])
+	name := fmt.Sprintf("%x.svg", sum[:10])
 	return filepath.Join(mediaDir, "images", name)
 }
 
-// EnsureSentenceImage returns a JPEG path, generating with the cheap turbo model if needed.
+// EnsureSentenceImage returns a local SVG path. It is intentionally network-free:
+// a lesson page should never wait on a slow image model before the child can continue.
 func EnsureSentenceImage(zh, scene, style string) (string, error) {
 	if style == "" {
 		style = "comic"
 	}
 	prompt := SentenceImagePrompt(zh, scene, style)
 	path := ImageCachePath(style, prompt)
-	if st, err := os.Stat(path); err == nil && st.Size() > 1000 {
+	if st, err := os.Stat(path); err == nil && st.Size() > 400 {
 		return path, nil
 	}
 	lock := imageLock(path)
 	lock.Lock()
 	defer lock.Unlock()
-	if st, err := os.Stat(path); err == nil && st.Size() > 1000 {
+	if st, err := os.Stat(path); err == nil && st.Size() > 400 {
 		return path, nil
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return "", err
 	}
-	if err := fetchCheapImage(prompt, path); err != nil {
-		fallback := filepath.Join(staticDir, "images", style, fallbackScene(scene)+".webp")
-		if _, statErr := os.Stat(fallback); statErr == nil {
-			return fallback, nil
-		}
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, []byte(localSentenceSVG(zh, scene, style)), 0o644); err != nil {
+		return "", err
+	}
+	if err := os.Rename(tmp, path); err != nil {
 		return "", err
 	}
 	return path, nil
@@ -176,68 +171,158 @@ func imageLock(path string) *sync.Mutex {
 	return v.(*sync.Mutex)
 }
 
-func fetchCheapImage(prompt, dest string) error {
-	var last error
-	for attempt := 0; attempt < 3; attempt++ {
-		if attempt > 0 {
-			time.Sleep(time.Duration(attempt) * 800 * time.Millisecond)
-		}
-		last = fetchCheapImageOnce(prompt, dest)
-		if last == nil {
-			return nil
-		}
-	}
-	return last
+func localSentenceSVG(zh, scene, style string) string {
+	p := svgPalette(style)
+	concept := imageConcept(zh, scene)
+	seed := sha1.Sum([]byte(zh + "|" + scene + "|" + style))
+	boyX := 360 + int(seed[0])%56 - 28
+	ballX := 470 + int(seed[1])%88 - 44
+	cloudX := 78 + int(seed[2])%95
+	title := html.EscapeString(zh)
+	return fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 576" role="img" aria-label="%s">
+<defs>
+<linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="%s"/></filter>
+</defs>
+<rect width="768" height="576" fill="url(#sky)"/>
+%s
+<ellipse cx="384" cy="520" rx="330" ry="60" fill="%s" opacity=".9"/>
+%s
+%s
+%s
+%s
+%s
+</svg>`,
+		title,
+		p.skyTop, p.skyBottom, p.blur,
+		svgAtmosphere(cloudX, p),
+		p.ground,
+		svgScene(concept, p),
+		svgBoy(boyX, 250, p),
+		svgBall(ballX, 424, p),
+		svgStyleOverlay(style, p),
+		"",
+	)
 }
 
-func fetchCheapImageOnce(prompt, dest string) error {
-	seed := int(sha1.Sum([]byte(prompt))[0])
-	u := imageAPI + url.PathEscape(prompt) + fmt.Sprintf("?width=768&height=576&nologo=true&model=%s&seed=%d", imageModel, seed)
-	req, err := http.NewRequest(http.MethodGet, u, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("User-Agent", "xiaoxue-zhongwen/1.0")
-	resp, err := imageClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("image api status %d", resp.StatusCode)
-	}
-	tmp := dest + ".tmp"
-	f, err := os.Create(tmp)
-	if err != nil {
-		return err
-	}
-	n, copyErr := io.Copy(f, resp.Body)
-	closeErr := f.Close()
-	if copyErr != nil {
-		_ = os.Remove(tmp)
-		return copyErr
-	}
-	if closeErr != nil {
-		_ = os.Remove(tmp)
-		return closeErr
-	}
-	if n < 2000 {
-		_ = os.Remove(tmp)
-		return fmt.Errorf("image too small (%d bytes)", n)
-	}
-	return os.Rename(tmp, dest)
+type svgColors struct {
+	skyTop, skyBottom string
+	ground            string
+	line              string
+	fill              string
+	accent            string
+	red               string
+	blue              string
+	shadow            string
+	blur              string
 }
 
-func fallbackScene(scene string) string {
-	alias := map[string]string{
-		"house": "island", "kick": "firstkick", "run": "daily",
-		"effort": "daily", "goodbye": "academy", "travel": "star",
+func svgPalette(style string) svgColors {
+	switch style {
+	case "picturebook":
+		return svgColors{"#fff3cf", "#d9f0ff", "#cde8b5", "#5c4a32", "#fffaf0", "#f7c96f", "#e66954", "#78a6d8", "#000000", "1.6"}
+	case "realistic":
+		return svgColors{"#dfe8ef", "#f4efe4", "#98b783", "#2e2a22", "#f2eadc", "#c9a566", "#b94e42", "#667f9b", "#000000", "0.4"}
+	default:
+		return svgColors{"#c9f0ff", "#fff3b8", "#72d06d", "#2c2419", "#fffdf2", "#ffd34d", "#ef4f3d", "#4aa3ff", "#000000", "0"}
 	}
-	if next, ok := alias[scene]; ok {
-		return next
+}
+
+func imageConcept(zh, scene string) string {
+	switch {
+	case strings.Contains(zh, "手术") || strings.Contains(zh, "心跳") || strings.Contains(zh, "医生") || strings.Contains(zh, "医院"):
+		return "hospital"
+	case strings.Contains(zh, "家里人") || strings.Contains(zh, "爸爸") || strings.Contains(zh, "妈妈") || strings.Contains(zh, "爱"):
+		return "family"
+	case strings.Contains(zh, "离开") || strings.Contains(zh, "十二岁") || strings.Contains(zh, "打电话") || strings.Contains(zh, "想家") || strings.Contains(zh, "哭"):
+		return "goodbye"
+	case strings.Contains(zh, "里斯本") || strings.Contains(zh, "学院") || strings.Contains(zh, "口音") || scene == "academy":
+		return "academy"
+	case strings.Contains(zh, "英国") || strings.Contains(zh, "曼联") || strings.Contains(zh, "鼓掌") || strings.Contains(zh, "有名") || scene == "star":
+		return "stadium"
+	case strings.Contains(zh, "训练") || strings.Contains(zh, "努力") || strings.Contains(zh, "射门") || strings.Contains(zh, "进球") || strings.Contains(zh, "两只脚"):
+		return "training"
+	case strings.Contains(zh, "小岛") || strings.Contains(zh, "葡萄牙") || strings.Contains(zh, "家很小") || scene == "island" || scene == "house":
+		return "island"
+	default:
+		return sceneVisual(scene)
 	}
-	if scene == "" {
-		return "intro"
+}
+
+func svgAtmosphere(x int, p svgColors) string {
+	return fmt.Sprintf(`<circle cx="640" cy="92" r="46" fill="%s" opacity=".9"/>
+<g fill="#fff" opacity=".82"><ellipse cx="%d" cy="86" rx="54" ry="22"/><ellipse cx="%d" cy="78" rx="34" ry="24"/><ellipse cx="%d" cy="90" rx="42" ry="18"/></g>`, p.accent, x, x+44, x+88)
+}
+
+func svgScene(concept string, p svgColors) string {
+	switch concept {
+	case "hospital":
+		return fmt.Sprintf(`<rect x="76" y="270" width="210" height="130" rx="18" fill="%s" stroke="%s" stroke-width="6"/>
+<rect x="160" y="298" width="40" height="76" rx="8" fill="%s"/><rect x="142" y="316" width="76" height="40" rx="8" fill="%s"/>
+<g transform="translate(232 274)">%s</g>`, p.fill, p.line, p.red, p.red, svgAdult("#eef5ff", p))
+	case "family":
+		return fmt.Sprintf(`<path d="M72 396h232V252L188 176 72 252z" fill="%s" stroke="%s" stroke-width="6"/>
+<rect x="132" y="304" width="56" height="92" rx="8" fill="%s"/><rect x="214" y="288" width="54" height="46" fill="%s"/>
+<g transform="translate(98 288)">%s</g><g transform="translate(176 282) scale(.9)">%s</g>`, p.fill, p.line, p.blue, p.accent, svgAdult(p.red, p), svgAdult(p.blue, p))
+	case "goodbye":
+		return fmt.Sprintf(`<path d="M80 402 C170 338 236 338 310 402" fill="none" stroke="%s" stroke-width="8"/>
+<path d="M86 370h160v-92l-80-56-80 56z" fill="%s" stroke="%s" stroke-width="6"/>
+<path d="M508 384 l38 36 h-76 z" fill="%s" stroke="%s" stroke-width="5"/>
+<rect x="500" y="302" width="36" height="92" rx="12" fill="%s"/>`, p.line, p.fill, p.line, p.accent, p.line, p.blue)
+	case "academy":
+		return fmt.Sprintf(`<rect x="72" y="244" width="248" height="148" rx="16" fill="%s" stroke="%s" stroke-width="6"/>
+<rect x="108" y="286" width="48" height="52" fill="%s"/><rect x="180" y="286" width="48" height="52" fill="%s"/><rect x="252" y="286" width="36" height="106" fill="%s"/>
+<path d="M426 384h210M426 384v-86h130" fill="none" stroke="%s" stroke-width="8"/>`, p.fill, p.line, p.blue, p.blue, p.accent, p.line)
+	case "stadium":
+		return fmt.Sprintf(`<path d="M56 354 C178 240 590 240 712 354 L668 410 C540 342 228 342 100 410z" fill="%s" stroke="%s" stroke-width="6"/>
+<path d="M120 334 C250 288 518 288 648 334" fill="none" stroke="%s" stroke-width="10"/>
+<path d="M154 408h460v-116" fill="none" stroke="%s" stroke-width="7"/>`, p.blue, p.line, p.accent, p.line)
+	case "training", "boy practicing football":
+		return fmt.Sprintf(`<path d="M118 408h154M118 408v-104h154v104" fill="none" stroke="%s" stroke-width="8"/>
+<path d="M92 444h50l-25-58zM214 444h50l-25-58z" fill="%s" stroke="%s" stroke-width="4"/>
+<path d="M530 416 C594 388 650 388 704 416" fill="none" stroke="%s" stroke-width="7"/>`, p.line, p.accent, p.line, p.line)
+	default:
+		return fmt.Sprintf(`<path d="M68 390 C136 326 228 326 300 390" fill="%s" stroke="%s" stroke-width="6"/>
+<path d="M86 386h152v-92l-76-54-76 54z" fill="%s" stroke="%s" stroke-width="6"/>
+<rect x="138" y="326" width="48" height="60" rx="8" fill="%s"/>
+<path d="M0 410 C110 372 214 430 326 390 C448 348 550 390 768 356 V576 H0z" fill="%s" opacity=".55"/>`, p.ground, p.line, p.fill, p.line, p.blue, p.blue)
 	}
-	return scene
+}
+
+func svgAdult(clothes string, p svgColors) string {
+	return fmt.Sprintf(`<g><circle cx="32" cy="26" r="22" fill="#f4c69b" stroke="%s" stroke-width="4"/>
+<path d="M12 72 C16 42 48 42 52 72 L60 120 H4z" fill="%s" stroke="%s" stroke-width="4"/>
+<path d="M12 18 C22 0 48 4 56 24 C42 18 28 18 12 18z" fill="#3b2a1c"/></g>`, p.line, clothes, p.line)
+}
+
+func svgBoy(x, y int, p svgColors) string {
+	return fmt.Sprintf(`<g transform="translate(%d %d)">
+<ellipse cx="78" cy="236" rx="74" ry="18" fill="%s" opacity=".16" filter="url(#soft)"/>
+<path d="M58 148 l-28 78M104 148 l34 76" stroke="%s" stroke-width="18" stroke-linecap="round"/>
+<path d="M56 140 l-38 42M106 140 l48 26" stroke="#f4c69b" stroke-width="16" stroke-linecap="round"/>
+<path d="M42 84 h78 l22 72 H20z" fill="%s" stroke="%s" stroke-width="6" stroke-linejoin="round"/>
+<circle cx="80" cy="50" r="42" fill="#f4c69b" stroke="%s" stroke-width="6"/>
+<path d="M38 38 C44 0 98 -12 122 30 C100 18 82 28 66 18 C58 30 50 34 38 38z" fill="#2b2118"/>
+<circle cx="66" cy="52" r="4" fill="%s"/><circle cx="94" cy="52" r="4" fill="%s"/>
+<path d="M68 70 Q80 80 96 70" fill="none" stroke="%s" stroke-width="4" stroke-linecap="round"/>
+</g>`, x-80, y, p.shadow, p.line, p.red, p.line, p.line, p.line, p.line, p.line)
+}
+
+func svgBall(x, y int, p svgColors) string {
+	return fmt.Sprintf(`<g transform="translate(%d %d)">
+<circle cx="0" cy="0" r="34" fill="#fff" stroke="%s" stroke-width="5"/>
+<path d="M0 -20 L18 -6 L12 18 H-12 L-18 -6z" fill="%s"/>
+<path d="M0 -20 L0 -34M18 -6 L32 -14M12 18 L24 30M-12 18 L-24 30M-18 -6 L-32 -14" stroke="%s" stroke-width="4"/>
+</g>`, x, y, p.line, p.line, p.line)
+}
+
+func svgStyleOverlay(style string, p svgColors) string {
+	switch style {
+	case "picturebook":
+		return `<rect width="768" height="576" fill="#fff" opacity=".10"/><g opacity=".16" stroke="#8b704c" stroke-width="1"><path d="M0 82h768M0 186h768M0 302h768M0 438h768"/></g>`
+	case "realistic":
+		return `<rect width="768" height="576" fill="#000" opacity=".04"/><ellipse cx="384" cy="276" rx="350" ry="242" fill="#fff" opacity=".10"/>`
+	default:
+		return fmt.Sprintf(`<rect x="18" y="18" width="732" height="540" rx="32" fill="none" stroke="%s" stroke-width="6" opacity=".16"/>`, p.line)
+	}
 }
