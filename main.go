@@ -124,10 +124,6 @@ func main() {
 	mux.HandleFunc("/api/ocr", handler.HandleOcr)
 	mux.HandleFunc("/api/ocr-pdf", handler.HandleOcrPdf)
 	mux.HandleFunc("/api/history", handler.HandleHistory)
-	mux.HandleFunc("/api/learn/catalog", handler.HandleLearnCatalog)
-	mux.HandleFunc("/api/learn/interest", handler.HandleLearnInterest)
-	mux.HandleFunc("/api/learn/books", handler.HandleLearnBooks)
-	mux.HandleFunc("/api/learn/story/{id}", handler.HandleLearnStory)
 
 	// Serve Static Frontend
 	staticDir := getStaticDir()
@@ -170,7 +166,6 @@ func main() {
 
 	// Bind HTTP server
 	log.Printf("OCR Server running on http://%s", config.BindAddress)
-	log.Printf("Chinese learning stories: http://%s/learn/", config.BindAddress)
 	log.Println("Please open your browser and navigate to the address above.")
 
 	server := &http.Server{

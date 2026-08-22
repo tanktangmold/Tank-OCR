@@ -28,12 +28,6 @@ out/
 *.jpeg
 *.pdf
 
-# Kid-facing story art is part of the Chinese learning app
-!static/learn/images/
-!static/learn/images/**/*.jpg
-!static/learn/images/**/*.png
-!static/learn/images/**/*.svg
-
 # Python fallback environment
 .venv/
 __pycache__/
