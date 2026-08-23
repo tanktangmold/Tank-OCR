@@ -8,6 +8,7 @@ const SCENE_ALIAS = {
 };
 
 const AVATARS = ["⚽", "🌟", "🐼", "🐶", "🌸", "🔥", "🌈", "🎯"];
+const IMAGE_STYLES = ["comic", "picturebook", "realistic"];
 const IMAGE_VERSION = "local-svg-v3";
 
 const state = {
@@ -38,6 +39,7 @@ const state = {
     game: null,
     gameIndex: 0,
     buildPicked: [],
+    courseImagesPreloaded: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -65,6 +67,37 @@ function sceneUrl(style, scene) {
 
 function lineImageUrl(day, line, style) {
     return `/api/image?day=${day}&line=${line}&style=${encodeURIComponent(style)}&v=${IMAGE_VERSION}`;
+}
+
+function preloadCourseImages() {
+    if (!state.course || state.courseImagesPreloaded) return;
+    state.courseImagesPreloaded = true;
+    const urls = [];
+    state.course.days.forEach((lesson) => {
+        (lesson.lines || []).forEach((_, line) => {
+            IMAGE_STYLES.forEach((style) => urls.push(lineImageUrl(lesson.day, line, style)));
+        });
+    });
+    let index = 0;
+    const schedule = (fn) => {
+        if (window.requestIdleCallback) {
+            requestIdleCallback(fn, { timeout: 800 });
+        } else {
+            setTimeout(() => fn({ timeRemaining: () => 12 }), 30);
+        }
+    };
+    const loadBatch = (deadline) => {
+        let count = 0;
+        while (index < urls.length && count < 24 && (count === 0 || deadline.timeRemaining() > 2)) {
+            const img = new Image();
+            img.decoding = "async";
+            img.src = urls[index];
+            index += 1;
+            count += 1;
+        }
+        if (index < urls.length) schedule(loadBatch);
+    };
+    schedule(loadBatch);
 }
 
 function pickChineseVoice() {
@@ -331,6 +364,7 @@ async function selectChild(child) {
     localStorage.setItem("learn-child", child.id);
     state.course = await api("/api/course");
     state.progress = await api(`/api/children/${child.id}/progress`);
+    preloadCourseImages();
     renderCalendar();
     showScreen("calendar");
 }
@@ -409,7 +443,7 @@ function currentBeat() {
 function renderStyles() {
     const bar = $("style-bar");
     bar.innerHTML = "";
-    ["comic", "picturebook", "realistic"].forEach((id, i) => {
+    IMAGE_STYLES.forEach((id, i) => {
         const ja = ["まんが", "えほん", "リアル"][i];
         const icon = ["🎨", "📖", "🌿"][i];
         const btn = document.createElement("button");
@@ -490,14 +524,15 @@ function renderLesson() {
     $("pattern-card").innerHTML = `<div class="pattern-label">句型</div>
         <p class="pattern-zh">${escapeHtml(beat.pattern.zh)}</p>
         <p class="pattern-ja">${escapeHtml(beat.pattern.ja)}</p>`;
-    $("sentence-pinyin").textContent = beat.sentence.pinyin;
+    $("sentence-pinyin").hidden = true;
     $("sentence-ja").textContent = beat.sentence.ja;
     $("sentence-words").innerHTML = "";
     (beat.sentence.tokens || []).forEach((token) => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "word";
-        btn.textContent = token.zh;
+        btn.setAttribute("aria-label", `${token.zh} ${token.pinyin || ""}`.trim());
+        btn.innerHTML = wordWithPinyin(token);
         btn.addEventListener("click", (event) => {
             event.stopPropagation();
             speakChinese(token.zh);
@@ -511,6 +546,11 @@ function renderLesson() {
     const allHeard = lesson.lines.every((_, i) => state.heard.has(i));
     $("next-btn").textContent = last && allHeard ? "15分クリアへ" : last ? "ぜんぶ聞こう" : "つぎの文";
     prefetchLessonAudio();
+}
+
+function wordWithPinyin(token) {
+    const pinyin = escapeHtml(token.pinyin || "");
+    return `<span class="ruby-word"><span class="ruby-pinyin">${pinyin}</span><span class="ruby-zh">${escapeHtml(token.zh)}</span></span>`;
 }
 
 function renderDots() {
