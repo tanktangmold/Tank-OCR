@@ -1,0 +1,890 @@
+{
+  "styles": [
+    {
+      "id": "comic",
+      "zh": "漫画风",
+      "ja": "まんが",
+      "en": "Comic"
+    },
+    {
+      "id": "picturebook",
+      "zh": "绘本风",
+      "ja": "えほん",
+      "en": "Picture book"
+    },
+    {
+      "id": "realistic",
+      "zh": "写实风",
+      "ja": "リアル",
+      "en": "Realistic"
+    }
+  ],
+  "interests": [
+    {
+      "id": "football",
+      "zh": "足球",
+      "ja": "サッカー",
+      "emoji": "⚽"
+    },
+    {
+      "id": "books",
+      "zh": "绘本",
+      "ja": "えほん",
+      "emoji": "📖"
+    },
+    {
+      "id": "animals",
+      "zh": "小动物",
+      "ja": "どうぶつ",
+      "emoji": "🐶"
+    },
+    {
+      "id": "space",
+      "zh": "星星",
+      "ja": "うちゅう",
+      "emoji": "🌟"
+    }
+  ],
+  "stories": [
+    {
+      "id": "ronaldo-childhood",
+      "interest": "football",
+      "bookQuery": "Cristiano Ronaldo children biography Ultimate Football Heroes",
+      "title": {
+        "zh": "C罗小时候的故事",
+        "ja": "Cロナウドの子どものころ"
+      },
+      "summary": {
+        "zh": "从小岛上的小孩，到有名的足球运动员。",
+        "ja": "小さな島の子どもが、有名なサッカー選手になる話。"
+      },
+      "character": {
+        "zh": "罗纳尔多",
+        "ja": "ロナウド",
+        "alsoCalled": "C罗"
+      },
+      "beats": [
+        {
+          "scene": "intro",
+          "pattern": {
+            "zh": "这是 + 谁",
+            "ja": "これは + だれ",
+            "parts": [
+              {"zh": "这是", "ja": "これは", "tokenFrom": 0, "tokenTo": 1},
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "这是罗纳尔多。",
+            "pinyin": "Zhè shì Luónà'ěrduō.",
+            "ja": "これはロナウドです。",
+            "tokens": [
+              {"zh": "这", "pinyin": "zhè", "ja": "これ"},
+              {"zh": "是", "pinyin": "shì", "ja": "～です"},
+              {"zh": "罗纳尔多", "pinyin": "Luónà'ěrduō", "ja": "ロナウド"}
+            ]
+          }
+        },
+        {
+          "scene": "kick",
+          "pattern": {
+            "zh": "谁 + 喜欢 + 什么",
+            "ja": "だれ + すき + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "喜欢", "ja": "すき", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "他喜欢足球。",
+            "pinyin": "Tā xǐhuan zúqiú.",
+            "ja": "かれはサッカーがすきです。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "喜欢", "pinyin": "xǐhuan", "ja": "すき"},
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"}
+            ]
+          }
+        },
+        {
+          "scene": "island",
+          "pattern": {
+            "zh": "谁 + 住在 + 哪里",
+            "ja": "だれ + すむ + どこ",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "住在", "ja": "すんでいる", "tokenFrom": 1, "tokenTo": 2},
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 3, "tokenTo": 5}
+            ]
+          },
+          "sentence": {
+            "zh": "他住在小岛上。",
+            "pinyin": "Tā zhù zài xiǎo dǎo shàng.",
+            "ja": "かれは小さな島にすんでいます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "住", "pinyin": "zhù", "ja": "すむ"},
+              {"zh": "在", "pinyin": "zài", "ja": "～に"},
+              {"zh": "小", "pinyin": "xiǎo", "ja": "ちいさい"},
+              {"zh": "岛", "pinyin": "dǎo", "ja": "しま"},
+              {"zh": "上", "pinyin": "shàng", "ja": "のうえ"}
+            ]
+          }
+        },
+        {
+          "scene": "house",
+          "pattern": {
+            "zh": "谁的 + 什么 + 很 + 怎么样",
+            "ja": "だれの + なに + とても + どんな",
+            "parts": [
+              {"zh": "谁的", "ja": "だれの", "tokenFrom": 0, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "很", "ja": "とても", "tokenFrom": 3, "tokenTo": 3},
+              {"zh": "怎么样", "ja": "どんな", "tokenFrom": 4, "tokenTo": 4}
+            ]
+          },
+          "sentence": {
+            "zh": "他的家很小。",
+            "pinyin": "Tā de jiā hěn xiǎo.",
+            "ja": "かれのいえはとても小さいです。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "的", "pinyin": "de", "ja": "の"},
+              {"zh": "家", "pinyin": "jiā", "ja": "いえ"},
+              {"zh": "很", "pinyin": "hěn", "ja": "とても"},
+              {"zh": "小", "pinyin": "xiǎo", "ja": "ちいさい"}
+            ]
+          }
+        },
+        {
+          "scene": "firstkick",
+          "pattern": {
+            "zh": "谁 + 几岁 + 开始 + 做什么",
+            "ja": "だれ + なんさい + はじめる + すること",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "几岁", "ja": "なんさい", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "开始", "ja": "はじめる", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 3, "tokenTo": 4}
+            ]
+          },
+          "sentence": {
+            "zh": "他三岁开始踢足球。",
+            "pinyin": "Tā sān suì kāishǐ tī zúqiú.",
+            "ja": "かれは3さいでサッカーを始めました。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "三岁", "pinyin": "sān suì", "ja": "3さい"},
+              {"zh": "开始", "pinyin": "kāishǐ", "ja": "はじめる"},
+              {"zh": "踢", "pinyin": "tī", "ja": "ける"},
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"}
+            ]
+          }
+        },
+        {
+          "scene": "daily",
+          "pattern": {
+            "zh": "谁 + 每天 + 都 + 做什么",
+            "ja": "だれ + まいにち + いつも + すること",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "每天", "ja": "まいにち", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "都", "ja": "いつも", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他每天都踢球。",
+            "pinyin": "Tā měi tiān dōu tīqiú.",
+            "ja": "かれはまいにちサッカーをします。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "每天", "pinyin": "měi tiān", "ja": "まいにち"},
+              {"zh": "都", "pinyin": "dōu", "ja": "いつも"},
+              {"zh": "踢球", "pinyin": "tīqiú", "ja": "ボールをける"}
+            ]
+          }
+        },
+        {
+          "scene": "run",
+          "pattern": {
+            "zh": "谁 + 动词 + 得 + 很 + 形容词",
+            "ja": "だれ + どうし + とても + どんな",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "动词", "ja": "どうし", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "得", "ja": "～のようす", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "很", "ja": "とても", "tokenFrom": 3, "tokenTo": 3},
+              {"zh": "形容词", "ja": "どんな", "tokenFrom": 4, "tokenTo": 4}
+            ]
+          },
+          "sentence": {
+            "zh": "他跑得很快。",
+            "pinyin": "Tā pǎo de hěn kuài.",
+            "ja": "かれはとても速く走ります。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "跑", "pinyin": "pǎo", "ja": "はしる"},
+              {"zh": "得", "pinyin": "de", "ja": "～のようす"},
+              {"zh": "很", "pinyin": "hěn", "ja": "とても"},
+              {"zh": "快", "pinyin": "kuài", "ja": "はやい"}
+            ]
+          }
+        },
+        {
+          "scene": "academy",
+          "pattern": {
+            "zh": "谁 + 去 + 哪里",
+            "ja": "だれ + いく + どこ",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "去", "ja": "いく", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 2, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他去足球学校。",
+            "pinyin": "Tā qù zúqiú xuéxiào.",
+            "ja": "かれはサッカー学校に行きます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "去", "pinyin": "qù", "ja": "いく"},
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"},
+              {"zh": "学校", "pinyin": "xuéxiào", "ja": "がっこう"}
+            ]
+          }
+        },
+        {
+          "scene": "goodbye",
+          "pattern": {
+            "zh": "谁 + 离开了 + 什么",
+            "ja": "だれ + はなれた + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "离开了", "ja": "はなれた", "tokenFrom": 1, "tokenTo": 2},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他离开了家。",
+            "pinyin": "Tā líkāi le jiā.",
+            "ja": "かれはいえを離れました。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "离开", "pinyin": "líkāi", "ja": "はなれる"},
+              {"zh": "了", "pinyin": "le", "ja": "した"},
+              {"zh": "家", "pinyin": "jiā", "ja": "いえ"}
+            ]
+          }
+        },
+        {
+          "scene": "travel",
+          "pattern": {
+            "zh": "谁 + 几岁 + 去 + 哪里",
+            "ja": "だれ + なんさい + いく + どこ",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "几岁", "ja": "なんさい", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "去", "ja": "いく", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他十八岁去英国。",
+            "pinyin": "Tā shíbā suì qù Yīngguó.",
+            "ja": "かれは18さいでイギリスへ行きます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "十八岁", "pinyin": "shíbā suì", "ja": "18さい"},
+              {"zh": "去", "pinyin": "qù", "ja": "いく"},
+              {"zh": "英国", "pinyin": "Yīngguó", "ja": "イギリス"}
+            ]
+          }
+        },
+        {
+          "scene": "star",
+          "pattern": {
+            "zh": "谁 + 成了 + 什么",
+            "ja": "だれ + になった + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "成了", "ja": "になった", "tokenFrom": 1, "tokenTo": 2},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 3, "tokenTo": 4}
+            ]
+          },
+          "sentence": {
+            "zh": "他成了足球明星。",
+            "pinyin": "Tā chéng le zúqiú míngxīng.",
+            "ja": "かれはサッカーのスターになりました。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "成", "pinyin": "chéng", "ja": "なる"},
+              {"zh": "了", "pinyin": "le", "ja": "した"},
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"},
+              {"zh": "明星", "pinyin": "míngxīng", "ja": "スター"}
+            ]
+          }
+        },
+        {
+          "scene": "effort",
+          "pattern": {
+            "zh": "谁 + 一直 + 很 + 怎么样",
+            "ja": "だれ + ずっと + とても + どんな",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "一直", "ja": "ずっと", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "很", "ja": "とても", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "怎么样", "ja": "どんな", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他一直很努力。",
+            "pinyin": "Tā yīzhí hěn nǔlì.",
+            "ja": "かれはずっとがんばっています。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "一直", "pinyin": "yīzhí", "ja": "ずっと"},
+              {"zh": "很", "pinyin": "hěn", "ja": "とても"},
+              {"zh": "努力", "pinyin": "nǔlì", "ja": "がんばる"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "japan-football",
+      "interest": "football",
+      "bookQuery": "children football picture book soccer",
+      "title": {
+        "zh": "小明也喜欢足球",
+        "ja": "ミンもサッカーがすき"
+      },
+      "summary": {
+        "zh": "住在日本的小明，放学后去踢球。",
+        "ja": "日本に住むミンは、放課後にサッカーをします。"
+      },
+      "character": {
+        "zh": "小明",
+        "ja": "ミン",
+        "alsoCalled": "小明"
+      },
+      "beats": [
+        {
+          "scene": "park",
+          "pattern": {
+            "zh": "谁 + 住在 + 哪里",
+            "ja": "だれ + すむ + どこ",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "住在", "ja": "すんでいる", "tokenFrom": 1, "tokenTo": 2},
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "小明住在日本。",
+            "pinyin": "Xiǎomíng zhù zài Rìběn.",
+            "ja": "ミンは日本にすんでいます。",
+            "tokens": [
+              {"zh": "小明", "pinyin": "Xiǎomíng", "ja": "ミン"},
+              {"zh": "住", "pinyin": "zhù", "ja": "すむ"},
+              {"zh": "在", "pinyin": "zài", "ja": "～に"},
+              {"zh": "日本", "pinyin": "Rìběn", "ja": "にほん"}
+            ]
+          }
+        },
+        {
+          "scene": "kick",
+          "pattern": {
+            "zh": "谁 + 喜欢 + 什么",
+            "ja": "だれ + すき + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "喜欢", "ja": "すき", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "他喜欢足球。",
+            "pinyin": "Tā xǐhuan zúqiú.",
+            "ja": "かれはサッカーがすきです。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "喜欢", "pinyin": "xǐhuan", "ja": "すき"},
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"}
+            ]
+          }
+        },
+        {
+          "scene": "academy",
+          "pattern": {
+            "zh": "谁 + 每天 + 去 + 哪里",
+            "ja": "だれ + まいにち + いく + どこ",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "每天", "ja": "まいにち", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "去", "ja": "いく", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他每天去学校。",
+            "pinyin": "Tā měi tiān qù xuéxiào.",
+            "ja": "かれはまいにちがっこうへ行きます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "每天", "pinyin": "měi tiān", "ja": "まいにち"},
+              {"zh": "去", "pinyin": "qù", "ja": "いく"},
+              {"zh": "学校", "pinyin": "xuéxiào", "ja": "がっこう"}
+            ]
+          }
+        },
+        {
+          "scene": "daily",
+          "pattern": {
+            "zh": "什么时候 + 谁 + 做什么",
+            "ja": "いつ + だれ + すること",
+            "parts": [
+              {"zh": "什么时候", "ja": "いつ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "放学后他踢球。",
+            "pinyin": "Fàngxué hòu tā tīqiú.",
+            "ja": "ほうかご、かれはサッカーをします。",
+            "tokens": [
+              {"zh": "放学后", "pinyin": "fàngxué hòu", "ja": "ほうかご"},
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "踢球", "pinyin": "tīqiú", "ja": "ボールをける"}
+            ]
+          }
+        },
+        {
+          "scene": "book",
+          "pattern": {
+            "zh": "谁 + 也 + 做什么",
+            "ja": "だれ + も + すること",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "也", "ja": "も", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 2, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他也学中文。",
+            "pinyin": "Tā yě xué Zhōngwén.",
+            "ja": "かれは中国語も学びます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "也", "pinyin": "yě", "ja": "も"},
+              {"zh": "学", "pinyin": "xué", "ja": "まなぶ"},
+              {"zh": "中文", "pinyin": "Zhōngwén", "ja": "中国語"}
+            ]
+          }
+        },
+        {
+          "scene": "star",
+          "pattern": {
+            "zh": "什么 + 让 + 谁 + 怎么样",
+            "ja": "なに + だれを + どんな",
+            "parts": [
+              {"zh": "什么", "ja": "なに", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "让", "ja": "～させる", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "怎么样", "ja": "どんな", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "足球让他高兴。",
+            "pinyin": "Zúqiú ràng tā gāoxìng.",
+            "ja": "サッカーはかれをうれしくします。",
+            "tokens": [
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"},
+              {"zh": "让", "pinyin": "ràng", "ja": "～させる"},
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "高兴", "pinyin": "gāoxìng", "ja": "うれしい"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "football-book",
+      "interest": "books",
+      "bookQuery": "children soccer football picture book",
+      "title": {
+        "zh": "我最喜欢的足球书",
+        "ja": "いちばんすきなサッカーの本"
+      },
+      "summary": {
+        "zh": "一页一页看书，也一页一页学中文。",
+        "ja": "一ページずつ本を読んで、中国語も学びます。"
+      },
+      "character": {
+        "zh": "小孩",
+        "ja": "こども",
+        "alsoCalled": "小读者"
+      },
+      "beats": [
+        {
+          "scene": "book",
+          "pattern": {
+            "zh": "这是 + 什么",
+            "ja": "これは + なに",
+            "parts": [
+              {"zh": "这是", "ja": "これは", "tokenFrom": 0, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 4}
+            ]
+          },
+          "sentence": {
+            "zh": "这是一本好书。",
+            "pinyin": "Zhè shì yī běn hǎo shū.",
+            "ja": "これはいい本です。",
+            "tokens": [
+              {"zh": "这", "pinyin": "zhè", "ja": "これ"},
+              {"zh": "是", "pinyin": "shì", "ja": "～です"},
+              {"zh": "一", "pinyin": "yī", "ja": "いち"},
+              {"zh": "本", "pinyin": "běn", "ja": "さつ"},
+              {"zh": "好书", "pinyin": "hǎo shū", "ja": "いい本"}
+            ]
+          }
+        },
+        {
+          "scene": "intro",
+          "pattern": {
+            "zh": "哪里 + 有 + 什么",
+            "ja": "どこ + ある + なに",
+            "parts": [
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 0, "tokenTo": 1},
+              {"zh": "有", "ja": "いる", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 3, "tokenTo": 5}
+            ]
+          },
+          "sentence": {
+            "zh": "书里有一个小孩。",
+            "pinyin": "Shū lǐ yǒu yī gè xiǎohái.",
+            "ja": "本の中に一人のこどもがいます。",
+            "tokens": [
+              {"zh": "书", "pinyin": "shū", "ja": "ほん"},
+              {"zh": "里", "pinyin": "lǐ", "ja": "のなか"},
+              {"zh": "有", "pinyin": "yǒu", "ja": "いる"},
+              {"zh": "一", "pinyin": "yī", "ja": "ひとり"},
+              {"zh": "个", "pinyin": "gè", "ja": "にん"},
+              {"zh": "小孩", "pinyin": "xiǎohái", "ja": "こども"}
+            ]
+          }
+        },
+        {
+          "scene": "kick",
+          "pattern": {
+            "zh": "谁 + 喜欢 + 什么",
+            "ja": "だれ + すき + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "喜欢", "ja": "すき", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "小孩喜欢足球。",
+            "pinyin": "Xiǎohái xǐhuan zúqiú.",
+            "ja": "こどもはサッカーがすきです。",
+            "tokens": [
+              {"zh": "小孩", "pinyin": "xiǎohái", "ja": "こども"},
+              {"zh": "喜欢", "pinyin": "xǐhuan", "ja": "すき"},
+              {"zh": "足球", "pinyin": "zúqiú", "ja": "サッカー"}
+            ]
+          }
+        },
+        {
+          "scene": "book",
+          "pattern": {
+            "zh": "谁 + 天天 + 做什么",
+            "ja": "だれ + まいにち + すること",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "天天", "ja": "まいにち", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "他天天看书。",
+            "pinyin": "Tā tiāntiān kàn shū.",
+            "ja": "かれはまいにち本を読みます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "天天", "pinyin": "tiāntiān", "ja": "まいにち"},
+              {"zh": "看书", "pinyin": "kàn shū", "ja": "本をよむ"}
+            ]
+          }
+        },
+        {
+          "scene": "daily",
+          "pattern": {
+            "zh": "谁 + 也 + 去 + 做什么",
+            "ja": "だれ + も + いく + すること",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "也", "ja": "も", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "去", "ja": "いく", "tokenFrom": 2, "tokenTo": 2},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 3, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "他也去踢球。",
+            "pinyin": "Tā yě qù tīqiú.",
+            "ja": "かれもサッカーをしに行きます。",
+            "tokens": [
+              {"zh": "他", "pinyin": "tā", "ja": "かれ"},
+              {"zh": "也", "pinyin": "yě", "ja": "も"},
+              {"zh": "去", "pinyin": "qù", "ja": "いく"},
+              {"zh": "踢球", "pinyin": "tīqiú", "ja": "ボールをける"}
+            ]
+          }
+        },
+        {
+          "scene": "house",
+          "pattern": {
+            "zh": "什么 + 是 + 什么",
+            "ja": "なに + は + なに",
+            "parts": [
+              {"zh": "什么", "ja": "なに", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "是", "ja": "です", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "书是好朋友。",
+            "pinyin": "Shū shì hǎo péngyou.",
+            "ja": "本はよい友だちです。",
+            "tokens": [
+              {"zh": "书", "pinyin": "shū", "ja": "ほん"},
+              {"zh": "是", "pinyin": "shì", "ja": "～です"},
+              {"zh": "好", "pinyin": "hǎo", "ja": "よい"},
+              {"zh": "朋友", "pinyin": "péngyou", "ja": "ともだち"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "puppy-ball",
+      "interest": "animals",
+      "bookQuery": "dog football children picture book",
+      "title": {
+        "zh": "小狗也爱球",
+        "ja": "こいぬもボールがすき"
+      },
+      "summary": {
+        "zh": "旺旺是一只小狗。它也喜欢球。",
+        "ja": "ワンワンはこいぬ。ボールもだいすき。"
+      },
+      "character": {
+        "zh": "旺旺",
+        "ja": "ワンワン",
+        "alsoCalled": "小狗"
+      },
+      "beats": [
+        {
+          "scene": "puppy",
+          "pattern": {
+            "zh": "谁 + 是 + 什么",
+            "ja": "だれ + は + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "是", "ja": "です", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 4}
+            ]
+          },
+          "sentence": {
+            "zh": "旺旺是小狗。",
+            "pinyin": "Wàngwang shì xiǎo gǒu.",
+            "ja": "ワンワンはこいぬです。",
+            "tokens": [
+              {"zh": "旺旺", "pinyin": "Wàngwang", "ja": "ワンワン"},
+              {"zh": "是", "pinyin": "shì", "ja": "～です"},
+              {"zh": "小", "pinyin": "xiǎo", "ja": "ちいさい"},
+              {"zh": "狗", "pinyin": "gǒu", "ja": "いぬ"}
+            ]
+          }
+        },
+        {
+          "scene": "kick",
+          "pattern": {
+            "zh": "谁 + 喜欢 + 什么",
+            "ja": "だれ + すき + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "喜欢", "ja": "すき", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "它喜欢球。",
+            "pinyin": "Tā xǐhuan qiú.",
+            "ja": "ボールがすきです。",
+            "tokens": [
+              {"zh": "它", "pinyin": "tā", "ja": "それ"},
+              {"zh": "喜欢", "pinyin": "xǐhuan", "ja": "すき"},
+              {"zh": "球", "pinyin": "qiú", "ja": "ボール"}
+            ]
+          }
+        },
+        {
+          "scene": "run",
+          "pattern": {
+            "zh": "谁 + 天天 + 做什么",
+            "ja": "だれ + まいにち + すること",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "天天", "ja": "まいにち", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "做什么", "ja": "すること", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "它天天跑。",
+            "pinyin": "Tā tiāntiān pǎo.",
+            "ja": "まいにち走ります。",
+            "tokens": [
+              {"zh": "它", "pinyin": "tā", "ja": "それ"},
+              {"zh": "天天", "pinyin": "tiāntiān", "ja": "まいにち"},
+              {"zh": "跑", "pinyin": "pǎo", "ja": "はしる"}
+            ]
+          }
+        },
+        {
+          "scene": "park",
+          "pattern": {
+            "zh": "谁 + 很 + 怎么样",
+            "ja": "だれ + とても + どんな",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "很", "ja": "とても", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "怎么样", "ja": "どんな", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "它很开心。",
+            "pinyin": "Tā hěn kāixīn.",
+            "ja": "とてもうれしそうです。",
+            "tokens": [
+              {"zh": "它", "pinyin": "tā", "ja": "それ"},
+              {"zh": "很", "pinyin": "hěn", "ja": "とても"},
+              {"zh": "开心", "pinyin": "kāixīn", "ja": "うれしい"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "little-star",
+      "interest": "space",
+      "bookQuery": "children stars moon picture book",
+      "title": {
+        "zh": "一颗小星星",
+        "ja": "ちいさな星"
+      },
+      "summary": {
+        "zh": "晚上，小朋友看见一颗星星。",
+        "ja": "夜、こどもがお星さまを見ます。"
+      },
+      "character": {
+        "zh": "小星",
+        "ja": "おほしさま",
+        "alsoCalled": "星星"
+      },
+      "beats": [
+        {
+          "scene": "starry",
+          "pattern": {
+            "zh": "这是 + 什么",
+            "ja": "これは + なに",
+            "parts": [
+              {"zh": "这是", "ja": "これは", "tokenFrom": 0, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 3}
+            ]
+          },
+          "sentence": {
+            "zh": "这是小星星。",
+            "pinyin": "Zhè shì xiǎo xīngxing.",
+            "ja": "これはちいさな星です。",
+            "tokens": [
+              {"zh": "这", "pinyin": "zhè", "ja": "これ"},
+              {"zh": "是", "pinyin": "shì", "ja": "～です"},
+              {"zh": "小", "pinyin": "xiǎo", "ja": "ちいさい"},
+              {"zh": "星星", "pinyin": "xīngxing", "ja": "ほし"}
+            ]
+          }
+        },
+        {
+          "scene": "starry",
+          "pattern": {
+            "zh": "谁 + 在 + 哪里",
+            "ja": "だれ + に + どこ",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "在", "ja": "に", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "哪里", "ja": "どこ", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "它在天上。",
+            "pinyin": "Tā zài tiān shàng.",
+            "ja": "空のうえにいます。",
+            "tokens": [
+              {"zh": "它", "pinyin": "tā", "ja": "それ"},
+              {"zh": "在", "pinyin": "zài", "ja": "に"},
+              {"zh": "天上", "pinyin": "tiān shàng", "ja": "そらのうえ"}
+            ]
+          }
+        },
+        {
+          "scene": "house",
+          "pattern": {
+            "zh": "谁 + 看 + 什么",
+            "ja": "だれ + みる + なに",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "看", "ja": "みる", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "什么", "ja": "なに", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "小朋友看星星。",
+            "pinyin": "Xiǎo péngyou kàn xīngxing.",
+            "ja": "こどもが星を見ます。",
+            "tokens": [
+              {"zh": "小朋友", "pinyin": "xiǎo péngyou", "ja": "こども"},
+              {"zh": "看", "pinyin": "kàn", "ja": "みる"},
+              {"zh": "星星", "pinyin": "xīngxing", "ja": "ほし"}
+            ]
+          }
+        },
+        {
+          "scene": "starry",
+          "pattern": {
+            "zh": "谁 + 很 + 怎么样",
+            "ja": "だれ + とても + どんな",
+            "parts": [
+              {"zh": "谁", "ja": "だれ", "tokenFrom": 0, "tokenTo": 0},
+              {"zh": "很", "ja": "とても", "tokenFrom": 1, "tokenTo": 1},
+              {"zh": "怎么样", "ja": "どんな", "tokenFrom": 2, "tokenTo": 2}
+            ]
+          },
+          "sentence": {
+            "zh": "星星很亮。",
+            "pinyin": "Xīngxing hěn liàng.",
+            "ja": "星はとても明るいです。",
+            "tokens": [
+              {"zh": "星星", "pinyin": "xīngxing", "ja": "ほし"},
+              {"zh": "很", "pinyin": "hěn", "ja": "とても"},
+              {"zh": "亮", "pinyin": "liàng", "ja": "あかるい"}
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
